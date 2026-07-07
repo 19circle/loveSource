@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Love accompanied Long Yilan</title>
+	<link href="css/default.css" type="text/css" rel="stylesheet">
+	<script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/garden.js"></script>
+	<script type="text/javascript" src="js/functions.js"></script>
+</head>
+
+<body>
+<audio id="loveMusic" src="mp3/Ditto.mp3" preload="auto" loop playsinline></audio>
+
+<main id="mainDiv">
+	<div id="content">
+		<section id="code" aria-label="写给小蓝的话">
+			<span class="keyword">《夏日之恋》</span><br>
+			<br>
+			在夏日的光辉中，我们邂逅，<br>
+			你那真诚的微笑，如晨曦初露。<br>
+			在绿茵遍布的田野上，<br>
+			你的声音如清泉潺潺，温柔而坚定。<br>
+			<br>
+			你喜爱古老的诗篇，<br>
+			在那些文字间，找到心灵的归宿。<br>
+			你的勇敢如同夏日的骄阳，<br>
+			无惧风雨，坚定前行。<br>
+			<br>
+			善良的你，如花开在静谧的森林，<br>
+			每一个动作，都蕴含着温柔的力量。<br>
+			在大自然的怀抱中，<br>
+			我们并肩而行，感受生命的脉动。<br>
+			<br>
+			林间小径，鸟鸣声声，<br>
+			我们在这片宁静中，发现爱的真谛。<br>
+			你的眼眸，映射出无尽的夏天，<br>
+			每一次凝视，都让我心神荡漾。<br>
+			<br>
+			你的名字，仿佛夏日的清风，<br>
+			轻轻拂过我心间，留下不灭的印记。<br>
+			在诗词的韵律中，我们的灵魂共舞，<br>
+			那是古风的吟唱，也是爱情的旋律。<br>
+			<br>
+			夏日的晚霞为你我铺就温暖的床，<br>
+			在繁星闪烁的夜空下，我深深祈愿，<br>
+			愿有一天，我们心灵相通，<br>
+			在岁月的长河中，彼此守望，共享永恒。<br>
+			<br>
+			<span class="keyword">致亲爱的 小蓝</span><br>
+
+			<hr>
+			<span class="keyword">I want to say:</span><br>
+
+			<span class="keyword">希望小蓝每天开心快乐</span><br>
+			<span class="keyword">每天见到自己想见的人，吃自己想吃的美食,看自己想看的小说，听自己想听的歌曲</span><br>
+			<span class="keyword">与大自然不亦乐乎，精神世界自由翱翔</span><br>
+			<span class="keyword">每天都有生活中的小美好，幸福常伴左右</span><br>
+			<br>
+		</section>
+
+		<section id="loveHeart" aria-label="爱心动画">
+			<canvas id="garden"></canvas>
+			<div id="words">
+				<div id="messages">
+					2022年2月1日相遇，开始相识，渐渐相知...
+					<div id="elapseClock"></div>
+				</div>
+			</div>
+		</section>
+	</div>
+</main>
+
+<footer class="site-footer">
+	<div id="loveHeartButton">
+		<button id="musicToggle" type="button" aria-label="播放音乐" title="播放音乐">
+			<span class="music-heart" aria-hidden="true">♥</span>
+			<span class="button-text">开启音乐</span>
+		</button>
+	</div>
+	<p>Made for LongYiLan</p>
+	<p>Copyright © 2024 - 2124. All Rights Reserved.</p>
+</footer>
+
+<script type="text/javascript">
+	var together = new Date(2022, 1, 1, 12, 0, 0, 0);
+
+	if (!document.createElement("canvas").getContext) {
+		var msg = document.createElement("div");
+		msg.id = "errorMsg";
+		msg.innerHTML = "Your browser doesn't support HTML5!<br>Recommend use Chrome/Edge/Firefox/Safari.";
+		document.body.appendChild(msg);
+		$("#code").hide();
+	} else {
+		$(function () {
+			setTimeout(function () {
+				startHeartAnimation();
+			}, 1600);
+
+			timeElapse(together);
+			setInterval(function () {
+				timeElapse(together);
+			}, 500);
+
+			adjustCodePosition();
+			$("#code").typewriter();
+			setupLoveMusic();
+		});
+	}
+</script>
+</body>
+</html>

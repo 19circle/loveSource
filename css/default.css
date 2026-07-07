@@ -1,0 +1,316 @@
+@font-face {
+    font-family: digit;
+    src: url("../digital-7_mono.ttf") format("truetype");
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    color: #3e3038;
+    background:
+        radial-gradient(circle at 12% 12%, rgba(255, 201, 213, 0.48), transparent 30%),
+        radial-gradient(circle at 88% 18%, rgba(179, 226, 214, 0.34), transparent 28%),
+        linear-gradient(135deg, #fff8ee 0%, #fff4f7 46%, #eef8f4 100%);
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+    font-size: 16px;
+    overflow-x: hidden;
+}
+
+#mainDiv {
+    width: 100%;
+    min-height: calc(100vh - 112px);
+    padding: clamp(16px, 4vw, 42px);
+    display: flex;
+    align-items: center;
+}
+
+#content {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(300px, 440px) minmax(320px, 1fr);
+    gap: clamp(18px, 4vw, 48px);
+    align-items: center;
+}
+
+#code {
+    width: 100%;
+    max-height: min(72vh, 640px);
+    padding: clamp(18px, 3vw, 26px);
+    color: #3b3038;
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(191, 91, 126, 0.16);
+    border-radius: 8px;
+    box-shadow: 0 18px 46px rgba(141, 77, 95, 0.14);
+    font-family: "Consolas", "Monaco", "Microsoft YaHei", "Courier New", monospace;
+    font-size: clamp(13px, 1.25vw, 15px);
+    line-height: 1.85;
+    overflow: auto;
+    scrollbar-width: thin;
+}
+
+#code hr {
+    height: 1px;
+    margin: 18px 0;
+    border: 0;
+    background: linear-gradient(90deg, transparent, rgba(191, 91, 126, 0.34), transparent);
+}
+
+#code .string {
+    color: #2a36ff;
+}
+
+#code .keyword {
+    color: #8a1f52;
+    font-weight: 700;
+}
+
+#code .placeholder {
+    margin-left: 15px;
+}
+
+#code .space {
+    margin-left: 7px;
+}
+
+#code .comments {
+    color: #3f7f5f;
+}
+
+#loveHeart {
+    position: relative;
+    width: min(670px, 100%);
+    aspect-ratio: 670 / 625;
+    min-height: 300px;
+    justify-self: center;
+}
+
+#garden {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#words {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    width: min(82%, 500px);
+    transform: translate(-50%, -50%);
+    color: #66535f;
+    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    font-size: clamp(16px, 2.2vw, 24px);
+    line-height: 1.45;
+    text-align: center;
+    text-shadow: 0 1px 10px rgba(255, 255, 255, 0.86);
+    pointer-events: none;
+}
+
+#messages {
+    display: none;
+}
+
+#elapseClock {
+    margin-top: 10px;
+    color: #7a445e;
+    font-size: clamp(14px, 1.5vw, 18px);
+    line-height: 1.7;
+    text-align: center;
+}
+
+#elapseClock .digit {
+    font-family: digit, "Consolas", monospace;
+    font-size: clamp(24px, 3.3vw, 36px);
+    color: #d44778;
+}
+
+#loveu {
+    padding: 5px;
+    font-size: 22px;
+    margin-top: 80px;
+    margin-right: 120px;
+    text-align: right;
+    display: none;
+}
+
+#loveu .signature {
+    margin-top: 10px;
+    font-size: 20px;
+    font-style: italic;
+}
+
+#clickSound {
+    display: none;
+}
+
+.site-footer {
+    padding: 0 16px 24px;
+    color: #7b6872;
+    text-align: center;
+}
+
+.site-footer p {
+    margin: 6px 0 0;
+    font-size: 12px;
+}
+
+#loveHeartButton {
+    display: inline-flex;
+    justify-content: center;
+}
+
+#musicToggle {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    color: #fff;
+    background: linear-gradient(135deg, #cf316b, #e76d8b);
+    border: 1px solid rgba(122, 25, 71, 0.18);
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(207, 49, 107, 0.22);
+    cursor: pointer;
+    font: 700 14px/1 "Microsoft YaHei", Arial, sans-serif;
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+#musicToggle:hover {
+    filter: brightness(1.04);
+    box-shadow: 0 12px 28px rgba(207, 49, 107, 0.28);
+}
+
+#musicToggle:active {
+    transform: translateY(1px);
+}
+
+#musicToggle:focus-visible {
+    outline: 3px solid rgba(207, 49, 107, 0.28);
+    outline-offset: 3px;
+}
+
+.music-heart {
+    display: inline-block;
+    font-size: 18px;
+    line-height: 1;
+}
+
+#musicToggle.is-playing .music-heart {
+    animation: heartBeat 900ms ease-in-out infinite;
+}
+
+.floating-heart {
+    position: fixed;
+    z-index: 20;
+    color: #df3f76;
+    font-size: 22px;
+    line-height: 1;
+    pointer-events: none;
+    animation: floatHeart 1200ms ease-out forwards;
+}
+
+#errorMsg {
+    width: 100%;
+    padding: 28px;
+    color: #8a1f52;
+    font-size: 20px;
+    text-align: center;
+}
+
+@keyframes heartBeat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    35% {
+        transform: scale(1.18);
+    }
+    60% {
+        transform: scale(0.96);
+    }
+}
+
+@keyframes floatHeart {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.8);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -96px) scale(1.55);
+    }
+}
+
+@media (max-width: 860px) {
+    #mainDiv {
+        min-height: auto;
+        align-items: flex-start;
+    }
+
+    #content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    #loveHeart {
+        order: -1;
+        width: min(100%, 560px);
+        min-height: 280px;
+    }
+
+    #code {
+        max-height: none;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    #mainDiv {
+        padding: 12px;
+    }
+
+    #content {
+        gap: 14px;
+    }
+
+    #loveHeart {
+        min-height: 250px;
+    }
+
+    #words {
+        top: 50%;
+        width: 90%;
+        font-size: 15px;
+    }
+
+    #code {
+        padding: 16px;
+        line-height: 1.75;
+        word-break: break-word;
+    }
+
+    #musicToggle {
+        width: min(100%, 220px);
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #musicToggle,
+    .music-heart,
+    .floating-heart {
+        animation: none !important;
+        transition: none !important;
+    }
+}
