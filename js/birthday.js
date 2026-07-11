@@ -1,7 +1,9 @@
 (function () {
-    var birthdayStart = new Date(2026, 6, 17, 0, 0, 0);
-    var birthdayEnd = new Date(2026, 6, 18, 0, 0, 0);
+    var birthdayStart = new Date(2026, 6, 17, 0, 0, 0, 0);
+    var birthdayEnd = new Date(2026, 6, 17, 23, 59, 59, 999);
     var countdownNodes = {
+        grid: document.getElementById("countdownGrid"),
+        title: document.getElementById("countdownTitle"),
         days: document.getElementById("days"),
         hours: document.getElementById("hours"),
         minutes: document.getElementById("minutes"),
@@ -18,10 +20,33 @@
         "",
         "小蓝，生日快乐。新的一岁，也请继续做那个真诚、勇敢、善良、自由的你。"
     ].join("\n");
+    var birthdayMelody = [
+        ["G4", 0.38], ["G4", 0.22], ["A4", 0.58], ["G4", 0.58], ["C5", 0.58], ["B4", 1.05],
+        ["G4", 0.38], ["G4", 0.22], ["A4", 0.58], ["G4", 0.58], ["D5", 0.58], ["C5", 1.05],
+        ["G4", 0.38], ["G4", 0.22], ["G5", 0.58], ["E5", 0.58], ["C5", 0.58], ["B4", 0.58], ["A4", 1.05],
+        ["F5", 0.38], ["F5", 0.22], ["E5", 0.58], ["C5", 0.58], ["D5", 0.58], ["C5", 1.2]
+    ];
+    var noteMap = {
+        G4: 392.00,
+        A4: 440.00,
+        B4: 493.88,
+        C5: 523.25,
+        D5: 587.33,
+        E5: 659.25,
+        F5: 698.46,
+        G5: 783.99
+    };
+    var musicState = {
+        context: null,
+        timers: [],
+        nodes: [],
+        isPlaying: false
+    };
     var particles = [];
     var canvas = document.getElementById("birthdayCanvas");
     var ctx = canvas.getContext("2d");
     var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var letterStarted = false;
 
     function pad(value) {
         return String(value).padStart(2, "0");
@@ -29,28 +54,28 @@
 
     function updateCountdown() {
         var now = new Date();
-        var distance = birthdayStart.getTime() - now.getTime();
 
-        if (distance > 0) {
-            renderDuration(distance);
-            countdownNodes.status.textContent = "这份生日祝福正在倒计时，等 2026 年 7 月 17 日正式点亮。";
+        if (now.getTime() < birthdayStart.getTime()) {
+            renderDuration(birthdayStart.getTime() - now.getTime());
+            countdownNodes.grid.classList.remove("is-hidden");
+            countdownNodes.title.textContent = "距离 2026 年 7 月 17 日";
+            countdownNodes.status.textContent = "距离小蓝的生日还有这些时间，等那一天正式点亮祝福。";
             document.body.classList.remove("is-birthday");
             return;
         }
 
-        document.body.classList.add("is-birthday");
+        countdownNodes.grid.classList.add("is-hidden");
 
-        if (now.getTime() < birthdayEnd.getTime()) {
-            renderDuration(birthdayEnd.getTime() - now.getTime());
-            countdownNodes.status.textContent = "今天就是小蓝的生日，生日快乐！愿这一整天都被温柔照顾。";
+        if (now.getTime() <= birthdayEnd.getTime()) {
+            countdownNodes.title.textContent = "今天是小蓝的生日";
+            countdownNodes.status.textContent = "小蓝，生日快乐！今天一整天都是生日当天，不需要倒计时，只需要认真庆祝。";
+            document.body.classList.add("is-birthday");
             return;
         }
 
-        countdownNodes.days.textContent = "00";
-        countdownNodes.hours.textContent = "00";
-        countdownNodes.minutes.textContent = "00";
-        countdownNodes.seconds.textContent = "00";
-        countdownNodes.status.textContent = "小蓝的 2026 生日祝福已经送达，这一天被认真收藏起来了。";
+        countdownNodes.title.textContent = "2026 年生日庆祝完毕";
+        countdownNodes.status.textContent = "2026年生日庆祝完毕，平安喜乐。愿这份祝福继续留在这里，陪小蓝走向新的一岁。";
+        document.body.classList.remove("is-birthday");
     }
 
     function renderDuration(distance) {
@@ -69,42 +94,104 @@
     }
 
     function setupMusic() {
-        var audio = document.getElementById("birthdayMusic");
         var button = document.getElementById("musicToggle");
         var text = button.querySelector(".music-text");
 
         function setState(isPlaying) {
+            musicState.isPlaying = isPlaying;
             button.classList.toggle("is-playing", isPlaying);
-            text.textContent = isPlaying ? "音乐播放中" : "开启音乐";
+            text.textContent = isPlaying ? "生日歌播放中" : "开启音乐";
         }
 
         button.addEventListener("click", function () {
-            if (audio.paused) {
-                var result = audio.play();
-                if (result && typeof result.then === "function") {
-                    result.then(function () {
-                        setState(true);
-                    }).catch(function () {
-                        setState(false);
-                    });
-                } else {
-                    setState(true);
-                }
-            } else {
-                audio.pause();
+            if (musicState.isPlaying) {
+                stopBirthdaySong();
                 setState(false);
+            } else {
+                setState(startBirthdaySong());
             }
 
             createSpark(button);
-            burstParticles(18);
+            burstParticles(20);
+        });
+    }
+
+    function startBirthdaySong() {
+        stopBirthdaySong();
+
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) {
+            return false;
+        }
+
+        if (!musicState.context) {
+            musicState.context = new AudioContext();
+        }
+
+        if (musicState.context.state === "suspended") {
+            musicState.context.resume();
+        }
+
+        playMelodyLoop();
+        return true;
+    }
+
+    function playMelodyLoop() {
+        var startAt = musicState.context.currentTime + 0.05;
+        var cursor = 0;
+
+        birthdayMelody.forEach(function (item) {
+            var note = item[0];
+            var duration = item[1];
+            scheduleNote(noteMap[note], startAt + cursor, duration);
+            cursor += duration;
         });
 
-        audio.addEventListener("pause", function () {
-            setState(false);
+        var timer = setTimeout(function () {
+            if (musicState.isPlaying) {
+                playMelodyLoop();
+            }
+        }, Math.ceil((cursor + 0.8) * 1000));
+
+        musicState.timers.push(timer);
+    }
+
+    function scheduleNote(frequency, startAt, duration) {
+        var context = musicState.context;
+        var oscillator = context.createOscillator();
+        var gain = context.createGain();
+
+        oscillator.type = "triangle";
+        oscillator.frequency.setValueAtTime(frequency, startAt);
+        gain.gain.setValueAtTime(0.0001, startAt);
+        gain.gain.exponentialRampToValueAtTime(0.16, startAt + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(startAt);
+        oscillator.stop(startAt + duration + 0.05);
+        musicState.nodes.push(oscillator);
+        oscillator.onended = function () {
+            musicState.nodes = musicState.nodes.filter(function (node) {
+                return node !== oscillator;
+            });
+        };
+    }
+
+    function stopBirthdaySong() {
+        musicState.timers.forEach(function (timer) {
+            clearTimeout(timer);
         });
-        audio.addEventListener("play", function () {
-            setState(true);
+        musicState.timers = [];
+        musicState.nodes.forEach(function (node) {
+            try {
+                node.stop();
+            } catch (error) {
+                // The note may already have finished.
+            }
         });
+        musicState.nodes = [];
     }
 
     function setupCake() {
@@ -121,7 +208,41 @@
                 ? "愿望已经被点亮：愿小蓝新的一岁开心、自由、明亮。"
                 : "愿望藏进星光里了，愿它悄悄实现。";
             createSpark(button);
-            burstParticles(isLit ? 34 : 22);
+            burstParticles(isLit ? 40 : 24);
+        });
+    }
+
+    function setupLetterButton() {
+        var button = document.getElementById("readLetterButton");
+        var section = document.getElementById("birthdayLetter");
+
+        button.addEventListener("click", function () {
+            section.hidden = false;
+            button.setAttribute("aria-expanded", "true");
+            button.textContent = letterStarted ? "继续读生日信" : "生日信已展开";
+
+            if (!letterStarted) {
+                typeLetter();
+                letterStarted = true;
+            }
+
+            setTimeout(function () {
+                section.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+            }, 80);
+        });
+    }
+
+    function setupWishCards() {
+        var cards = document.querySelectorAll(".wish-card");
+        cards.forEach(function (card) {
+            card.addEventListener("click", function () {
+                var isOpen = card.classList.toggle("is-open");
+                card.setAttribute("aria-expanded", isOpen ? "true" : "false");
+                var hint = card.querySelector("em");
+                hint.textContent = isOpen ? "已打开" : "再看一次";
+                createSpark(card);
+                burstParticles(isOpen ? 18 : 10);
+            });
         });
     }
 
@@ -175,12 +296,15 @@
     }
 
     function addParticle() {
+        var types = ["confetti", "balloon", "cake"];
+        var type = types[Math.floor(Math.random() * types.length)];
         var palette = ["#d94578", "#f0b94d", "#62bfa8", "#8a5fbf", "#ffffff"];
         particles.push({
+            type: type,
             x: Math.random() * window.innerWidth,
-            y: -20,
-            size: 5 + Math.random() * 7,
-            speed: 0.6 + Math.random() * 1.8,
+            y: type === "balloon" ? window.innerHeight + 40 : -24,
+            size: type === "balloon" ? 16 + Math.random() * 12 : 5 + Math.random() * 8,
+            speed: type === "balloon" ? -(0.45 + Math.random() * 0.8) : 0.6 + Math.random() * 1.8,
             drift: -0.7 + Math.random() * 1.4,
             rotation: Math.random() * Math.PI,
             spin: -0.04 + Math.random() * 0.08,
@@ -195,9 +319,10 @@
 
         for (var i = 0; i < amount; i++) {
             particles.push({
+                type: i % 9 === 0 ? "cake" : i % 4 === 0 ? "balloon" : "confetti",
                 x: window.innerWidth / 2 + (-90 + Math.random() * 180),
                 y: window.innerHeight * 0.28 + (-20 + Math.random() * 40),
-                size: 5 + Math.random() * 9,
+                size: 6 + Math.random() * 14,
                 speed: -1.8 + Math.random() * 3,
                 drift: -2.4 + Math.random() * 4.8,
                 rotation: Math.random() * Math.PI,
@@ -215,23 +340,71 @@
             p.x += p.drift;
             p.rotation += p.spin;
 
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotation);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.62);
-            ctx.restore();
+            if (p.type === "balloon") {
+                drawBalloonParticle(p);
+            } else if (p.type === "cake") {
+                drawCakeParticle(p);
+            } else {
+                drawConfettiParticle(p);
+            }
 
-            if (p.y > window.innerHeight + 30 || p.x < -40 || p.x > window.innerWidth + 40) {
+            if (p.y > window.innerHeight + 60 || p.y < -90 || p.x < -70 || p.x > window.innerWidth + 70) {
                 particles.splice(i, 1);
             }
         }
 
-        if (particles.length < 80 && Math.random() < 0.28) {
+        if (particles.length < 90 && Math.random() < 0.22) {
             addParticle();
         }
 
         requestAnimationFrame(drawParticles);
+    }
+
+    function drawConfettiParticle(p) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.62);
+        ctx.restore();
+    }
+
+    function drawBalloonParticle(p) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(Math.sin(p.rotation) * 0.14);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.size * 0.72, p.size, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.42)";
+        ctx.beginPath();
+        ctx.ellipse(-p.size * 0.22, -p.size * 0.24, p.size * 0.16, p.size * 0.26, -0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(116,86,98,0.38)";
+        ctx.beginPath();
+        ctx.moveTo(0, p.size);
+        ctx.quadraticCurveTo(7, p.size + 18, -2, p.size + 36);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawCakeParticle(p) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation * 0.25);
+        ctx.fillStyle = "#fff7fb";
+        ctx.fillRect(-p.size * 0.42, -p.size * 0.58, p.size * 0.84, p.size * 0.22);
+        ctx.fillStyle = "#ef7f9b";
+        ctx.fillRect(-p.size * 0.5, -p.size * 0.36, p.size, p.size * 0.34);
+        ctx.fillStyle = "#70c7b0";
+        ctx.fillRect(-p.size * 0.58, -p.size * 0.03, p.size * 1.16, p.size * 0.36);
+        ctx.fillStyle = "#ffc857";
+        ctx.fillRect(-1, -p.size * 0.92, 2, p.size * 0.28);
+        ctx.beginPath();
+        ctx.arc(0, -p.size, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
     }
 
     function init() {
@@ -239,12 +412,13 @@
         setInterval(updateCountdown, 1000);
         setupMusic();
         setupCake();
-        typeLetter();
+        setupLetterButton();
+        setupWishCards();
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
         if (!reducedMotion) {
-            burstParticles(28);
+            burstParticles(34);
             drawParticles();
         }
     }
