@@ -9,7 +9,17 @@
 </head>
 <body>
 <canvas id="birthdayCanvas" aria-hidden="true"></canvas>
-<audio id="birthdayMusic" src="mp3/Ditto.mp3" preload="auto" loop playsinline></audio>
+
+<div class="party-decor" aria-hidden="true">
+	<div class="balloon balloon-a"><span></span></div>
+	<div class="balloon balloon-b"><span></span></div>
+	<div class="balloon balloon-c"><span></span></div>
+	<div class="mini-cake">
+		<i></i>
+		<b></b>
+		<strong></strong>
+	</div>
+</div>
 
 <header class="topbar">
 	<a class="home-link" href="index.html">回到爱心页</a>
@@ -28,17 +38,19 @@
 				<span class="heart-icon" aria-hidden="true">♥</span>
 				<span class="music-text">开启音乐</span>
 			</button>
-			<a class="secondary-action" href="#birthdayLetter">读生日信</a>
+			<button id="readLetterButton" class="secondary-action" type="button" aria-expanded="false" aria-controls="birthdayLetter">
+				读生日信
+			</button>
 		</div>
 	</section>
 
 	<section class="countdown-band" aria-labelledby="countdownTitle">
 		<div class="section-heading">
-			<p class="eyebrow">Birthday Countdown</p>
-			<h2 id="countdownTitle">距离 2026 年 7 月 17 日</h2>
+			<p class="eyebrow">Birthday Moment</p>
+			<h2 id="countdownTitle">小蓝 2026 年生日时间</h2>
 		</div>
 		<div id="countdownStatus" class="countdown-status">正在计算这份期待...</div>
-		<div class="countdown-grid" aria-live="polite">
+		<div id="countdownGrid" class="countdown-grid" aria-live="polite">
 			<div class="time-unit">
 				<strong id="days">00</strong>
 				<span>天</span>
@@ -71,6 +83,7 @@
 					<span class="candle"><span class="flame"></span></span>
 				</div>
 				<div class="icing"></div>
+				<div class="sprinkles"></div>
 				<div class="cake-layer top-layer"></div>
 				<div class="cake-layer middle-layer"></div>
 				<div class="cake-layer bottom-layer"></div>
@@ -102,7 +115,7 @@
 		</div>
 	</section>
 
-	<section id="birthdayLetter" class="letter-band" aria-labelledby="letterTitle">
+	<section id="birthdayLetter" class="letter-band" aria-labelledby="letterTitle" hidden>
 		<div class="section-heading">
 			<p class="eyebrow">For Xiao Lan</p>
 			<h2 id="letterTitle">写给小蓝的生日信</h2>
@@ -110,23 +123,37 @@
 		<div id="letterText" class="letter-text" aria-live="polite"></div>
 	</section>
 
-	<section class="wish-grid" aria-label="生日祝福">
-		<article>
-			<span>01</span>
-			<p>愿你每天都有生活里的小美好，幸福常伴左右。</p>
-		</article>
-		<article>
-			<span>02</span>
-			<p>愿你读喜欢的小说，听喜欢的歌曲，精神世界自由翱翔。</p>
-		</article>
-		<article>
-			<span>03</span>
-			<p>愿你见到想见的人，吃到想吃的美食，心里永远有光。</p>
-		</article>
-		<article>
-			<span>04</span>
-			<p>愿新的一岁温柔、勇敢、自在，像夏天一样热烈明亮。</p>
-		</article>
+	<section class="wish-section" aria-labelledby="wishGridTitle">
+		<div class="section-heading wish-heading">
+			<p class="eyebrow">Four Little Wishes</p>
+			<h2 id="wishGridTitle">给小蓝的四枚生日愿望</h2>
+		</div>
+		<div class="wish-grid">
+			<button class="wish-card" type="button" aria-expanded="false">
+				<span class="wish-number">01</span>
+				<strong>打开一份小美好</strong>
+				<em>轻轻点开</em>
+				<p class="wish-detail">愿你每天都有生活里的小美好，幸福常伴左右。</p>
+			</button>
+			<button class="wish-card" type="button" aria-expanded="false">
+				<span class="wish-number">02</span>
+				<strong>打开一片自由</strong>
+				<em>为你收藏</em>
+				<p class="wish-detail">愿你读喜欢的小说，听喜欢的歌曲，精神世界自由翱翔。</p>
+			</button>
+			<button class="wish-card" type="button" aria-expanded="false">
+				<span class="wish-number">03</span>
+				<strong>打开一口甜</strong>
+				<em>慢慢揭晓</em>
+				<p class="wish-detail">愿你见到想见的人，吃到想吃的美食，心里永远有光。</p>
+			</button>
+			<button class="wish-card" type="button" aria-expanded="false">
+				<span class="wish-number">04</span>
+				<strong>打开新一岁</strong>
+				<em>送给未来</em>
+				<p class="wish-detail">愿新的一岁温柔、勇敢、自在，像夏天一样热烈明亮。</p>
+			</button>
+		</div>
 	</section>
 </main>
 
