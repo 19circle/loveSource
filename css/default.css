@@ -163,6 +163,16 @@ body {
     font-size: 12px;
 }
 
+.site-footer .footer-link {
+    color: #9a335e;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.site-footer .footer-link:hover {
+    text-decoration: underline;
+}
+
 #loveHeartButton {
     display: inline-flex;
     justify-content: center;

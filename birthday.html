@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>小蓝 2026 生日快乐</title>
+	<link href="css/birthday.css" rel="stylesheet">
+	<script src="js/birthday.js" defer></script>
+</head>
+<body>
+<canvas id="birthdayCanvas" aria-hidden="true"></canvas>
+<audio id="birthdayMusic" src="mp3/Ditto.mp3" preload="auto" loop playsinline></audio>
+
+<header class="topbar">
+	<a class="home-link" href="index.html">回到爱心页</a>
+	<span class="date-mark">2026.07.17</span>
+</header>
+
+<main class="birthday-page">
+	<section class="hero" aria-labelledby="birthdayTitle">
+		<p class="eyebrow">小蓝的生日特别页</p>
+		<h1 id="birthdayTitle">小蓝，生日快乐</h1>
+		<p class="hero-copy">
+			把这一天认真收藏起来：愿你见到想见的人，吃到想吃的美食，读到喜欢的故事，也被生活温柔地照亮。
+		</p>
+		<div class="hero-actions">
+			<button id="musicToggle" class="primary-action" type="button">
+				<span class="heart-icon" aria-hidden="true">♥</span>
+				<span class="music-text">开启音乐</span>
+			</button>
+			<a class="secondary-action" href="#birthdayLetter">读生日信</a>
+		</div>
+	</section>
+
+	<section class="countdown-band" aria-labelledby="countdownTitle">
+		<div class="section-heading">
+			<p class="eyebrow">Birthday Countdown</p>
+			<h2 id="countdownTitle">距离 2026 年 7 月 17 日</h2>
+		</div>
+		<div id="countdownStatus" class="countdown-status">正在计算这份期待...</div>
+		<div class="countdown-grid" aria-live="polite">
+			<div class="time-unit">
+				<strong id="days">00</strong>
+				<span>天</span>
+			</div>
+			<div class="time-unit">
+				<strong id="hours">00</strong>
+				<span>时</span>
+			</div>
+			<div class="time-unit">
+				<strong id="minutes">00</strong>
+				<span>分</span>
+			</div>
+			<div class="time-unit">
+				<strong id="seconds">00</strong>
+				<span>秒</span>
+			</div>
+		</div>
+	</section>
+
+	<section class="celebration-layout">
+		<div class="cake-stage" aria-labelledby="cakeTitle">
+			<div class="section-heading">
+				<p class="eyebrow">Make a Wish</p>
+				<h2 id="cakeTitle">生日蛋糕和小小愿望</h2>
+			</div>
+			<div class="cake" aria-hidden="true">
+				<div class="candles">
+					<span class="candle"><span class="flame"></span></span>
+					<span class="candle"><span class="flame"></span></span>
+					<span class="candle"><span class="flame"></span></span>
+				</div>
+				<div class="icing"></div>
+				<div class="cake-layer top-layer"></div>
+				<div class="cake-layer middle-layer"></div>
+				<div class="cake-layer bottom-layer"></div>
+				<div class="plate"></div>
+			</div>
+			<button id="wishButton" class="wish-button" type="button">点亮生日愿望</button>
+			<p id="wishMessage" class="wish-message">愿今天的风、光、花和歌，都偏爱小蓝一点。</p>
+		</div>
+
+		<div class="memory-panel" aria-labelledby="memoryTitle">
+			<div class="section-heading">
+				<p class="eyebrow">Birthday Memory</p>
+				<h2 id="memoryTitle">这次生日的记录</h2>
+			</div>
+			<ol class="memory-list">
+				<li>
+					<span>2026.07.11</span>
+					<p>开始为小蓝准备生日特别页，把期待一点点写进代码里。</p>
+				</li>
+				<li>
+					<span>2026.07.17</span>
+					<p>小蓝生日快乐，愿新的一岁开心、自由、明亮。</p>
+				</li>
+				<li>
+					<span>以后每一次打开</span>
+					<p>都能想起这个夏天，也想起这份认真准备过的祝福。</p>
+				</li>
+			</ol>
+		</div>
+	</section>
+
+	<section id="birthdayLetter" class="letter-band" aria-labelledby="letterTitle">
+		<div class="section-heading">
+			<p class="eyebrow">For Xiao Lan</p>
+			<h2 id="letterTitle">写给小蓝的生日信</h2>
+		</div>
+		<div id="letterText" class="letter-text" aria-live="polite"></div>
+	</section>
+
+	<section class="wish-grid" aria-label="生日祝福">
+		<article>
+			<span>01</span>
+			<p>愿你每天都有生活里的小美好，幸福常伴左右。</p>
+		</article>
+		<article>
+			<span>02</span>
+			<p>愿你读喜欢的小说，听喜欢的歌曲，精神世界自由翱翔。</p>
+		</article>
+		<article>
+			<span>03</span>
+			<p>愿你见到想见的人，吃到想吃的美食，心里永远有光。</p>
+		</article>
+		<article>
+			<span>04</span>
+			<p>愿新的一岁温柔、勇敢、自在，像夏天一样热烈明亮。</p>
+		</article>
+	</section>
+</main>
+
+<footer class="birthday-footer">
+	<p>Made for LongYiLan · Birthday 2026</p>
+</footer>
+</body>
+</html>
