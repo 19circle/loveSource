@@ -16,13 +16,19 @@ body {
     min-height: 100%;
     margin: 0;
     color: #352d36;
-    background: linear-gradient(135deg, #fff7ed 0%, #fff0f5 46%, #ecfbf4 100%);
+    background:
+        radial-gradient(circle at 10% 10%, rgba(255, 198, 213, 0.46), transparent 30%),
+        radial-gradient(circle at 88% 18%, rgba(115, 202, 182, 0.25), transparent 28%),
+        linear-gradient(135deg, #fff7ed 0%, #fff0f5 46%, #ecfbf4 100%);
     font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
     overflow-x: hidden;
 }
 
 body.is-birthday {
-    background: linear-gradient(135deg, #fff2d8 0%, #ffeef6 45%, #e9fff7 100%);
+    background:
+        radial-gradient(circle at 12% 12%, rgba(255, 210, 106, 0.34), transparent 30%),
+        radial-gradient(circle at 88% 12%, rgba(112, 199, 176, 0.3), transparent 30%),
+        linear-gradient(135deg, #fff2d8 0%, #ffeef6 45%, #e9fff7 100%);
 }
 
 #birthdayCanvas {
@@ -32,6 +38,139 @@ body.is-birthday {
     width: 100%;
     height: 100%;
     pointer-events: none;
+}
+
+.party-decor {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.balloon {
+    position: absolute;
+    width: 82px;
+    height: 104px;
+    border-radius: 50% 50% 48% 48%;
+    box-shadow: inset -13px -18px 0 rgba(91, 32, 58, 0.12), 0 18px 34px rgba(99, 61, 76, 0.12);
+    animation: balloonFloat 6s ease-in-out infinite;
+}
+
+.balloon::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    border-right: 7px solid transparent;
+    border-left: 7px solid transparent;
+    border-top: 14px solid currentColor;
+    transform: translateX(-50%);
+}
+
+.balloon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -98px;
+    width: 1px;
+    height: 92px;
+    background: rgba(120, 85, 96, 0.34);
+    transform: translateX(-50%);
+}
+
+.balloon span {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    width: 18px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    transform: rotate(28deg);
+}
+
+.balloon-a {
+    top: 112px;
+    left: max(18px, calc((100vw - 1120px) / 2 - 96px));
+    color: #df5a83;
+    background: #ef7f9b;
+}
+
+.balloon-b {
+    top: 170px;
+    right: max(20px, calc((100vw - 1120px) / 2 - 86px));
+    color: #56b89f;
+    background: #70c7b0;
+    animation-delay: -1.6s;
+}
+
+.balloon-c {
+    top: 390px;
+    right: max(42px, calc((100vw - 1120px) / 2 - 12px));
+    width: 66px;
+    height: 84px;
+    color: #e4a63b;
+    background: #f1b756;
+    animation-delay: -3.1s;
+}
+
+.mini-cake {
+    position: absolute;
+    left: max(22px, calc((100vw - 1120px) / 2 - 72px));
+    bottom: 90px;
+    width: 112px;
+    height: 88px;
+    opacity: 0.86;
+    animation: cakeFloat 7s ease-in-out infinite;
+}
+
+.mini-cake i,
+.mini-cake b,
+.mini-cake strong {
+    position: absolute;
+    left: 50%;
+    display: block;
+    transform: translateX(-50%);
+}
+
+.mini-cake i {
+    top: 4px;
+    width: 11px;
+    height: 22px;
+    background: repeating-linear-gradient(45deg, #fff 0 5px, #db5f86 5px 9px);
+    border-radius: 3px;
+}
+
+.mini-cake i::before {
+    content: "";
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    width: 14px;
+    height: 18px;
+    background: #ffc857;
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: 0 0 16px rgba(255, 193, 77, 0.7);
+    transform: translateX(-50%);
+}
+
+.mini-cake b {
+    top: 32px;
+    width: 82px;
+    height: 30px;
+    background: #ef7f9b;
+    border-radius: 8px 8px 4px 4px;
+    box-shadow: inset 0 -8px 0 rgba(117, 40, 63, 0.12);
+}
+
+.mini-cake strong {
+    top: 58px;
+    width: 106px;
+    height: 32px;
+    background: #70c7b0;
+    border-radius: 7px;
+    box-shadow: inset 0 -8px 0 rgba(45, 103, 89, 0.14);
 }
 
 .topbar,
@@ -59,13 +198,18 @@ body.is-birthday {
     justify-content: center;
     padding: 9px 14px;
     color: #8b2855;
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.76);
     border: 1px solid rgba(176, 77, 117, 0.2);
     border-radius: 8px;
     text-decoration: none;
     font-size: 14px;
     font-weight: 700;
     box-shadow: 0 8px 20px rgba(142, 83, 102, 0.1);
+}
+
+.secondary-action {
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .date-mark {
@@ -140,14 +284,16 @@ body.is-birthday {
 .primary-action:hover,
 .wish-button:hover,
 .home-link:hover,
-.secondary-action:hover {
+.secondary-action:hover,
+.wish-card:hover {
     filter: brightness(1.04);
 }
 
 .primary-action:focus-visible,
 .wish-button:focus-visible,
 .home-link:focus-visible,
-.secondary-action:focus-visible {
+.secondary-action:focus-visible,
+.wish-card:focus-visible {
     outline: 3px solid rgba(204, 49, 104, 0.24);
     outline-offset: 3px;
 }
@@ -165,11 +311,12 @@ body.is-birthday {
 .letter-band,
 .cake-stage,
 .memory-panel,
-.wish-grid article {
+.wish-section {
     border: 1px solid rgba(176, 77, 117, 0.18);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.74);
     box-shadow: 0 18px 46px rgba(126, 77, 94, 0.13);
+    backdrop-filter: blur(12px);
 }
 
 .countdown-band {
@@ -196,6 +343,10 @@ body.is-birthday {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
     margin-top: 22px;
+}
+
+.countdown-grid.is-hidden {
+    display: none;
 }
 
 .time-unit {
@@ -230,7 +381,8 @@ body.is-birthday {
 
 .cake-stage,
 .memory-panel,
-.letter-band {
+.letter-band,
+.wish-section {
     padding: clamp(22px, 4vw, 34px);
 }
 
@@ -288,6 +440,22 @@ body.is-birthday {
     border-radius: 8px 8px 18px 18px;
     transform: translateX(-50%);
     box-shadow: inset 0 -8px 0 rgba(255, 189, 210, 0.5);
+}
+
+.sprinkles {
+    position: absolute;
+    top: 82px;
+    left: 50%;
+    z-index: 4;
+    width: 190px;
+    height: 24px;
+    background:
+        radial-gradient(circle at 10% 42%, #d94578 0 3px, transparent 4px),
+        radial-gradient(circle at 24% 62%, #70c7b0 0 3px, transparent 4px),
+        radial-gradient(circle at 42% 36%, #f1b756 0 3px, transparent 4px),
+        radial-gradient(circle at 64% 58%, #8a5fbf 0 3px, transparent 4px),
+        radial-gradient(circle at 82% 42%, #d94578 0 3px, transparent 4px);
+    transform: translateX(-50%);
 }
 
 .cake-layer {
@@ -379,6 +547,10 @@ body.is-birthday {
     margin-top: 26px;
 }
 
+.letter-band[hidden] {
+    display: none;
+}
+
 .letter-text {
     min-height: 220px;
     margin-top: 20px;
@@ -394,29 +566,95 @@ body.is-birthday {
     animation: cursorBlink 900ms steps(2, start) infinite;
 }
 
+.wish-section {
+    margin-top: 26px;
+}
+
+.wish-heading {
+    margin-bottom: 20px;
+}
+
 .wish-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
-    margin-top: 26px;
 }
 
-.wish-grid article {
-    min-height: 180px;
+.wish-card {
+    position: relative;
+    min-height: 210px;
     padding: 20px;
+    color: #55444f;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 246, 250, 0.72)),
+        radial-gradient(circle at 90% 12%, rgba(241, 183, 86, 0.2), transparent 28%);
+    border: 1px solid rgba(176, 77, 117, 0.18);
+    border-radius: 8px;
+    box-shadow: 0 14px 36px rgba(126, 77, 94, 0.12);
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    overflow: hidden;
 }
 
-.wish-grid span {
+.wish-card::after {
+    content: "♥";
+    position: absolute;
+    right: 16px;
+    bottom: 10px;
+    color: rgba(206, 61, 114, 0.16);
+    font-size: 60px;
+    line-height: 1;
+}
+
+.wish-number {
+    display: block;
     color: #ce3d72;
     font-family: digit, "Consolas", monospace;
-    font-size: 28px;
+    font-size: 30px;
 }
 
-.wish-grid p {
-    margin: 18px 0 0;
+.wish-card strong {
+    display: block;
+    margin-top: 16px;
+    color: #49313e;
+    font-size: 18px;
+    line-height: 1.35;
+}
+
+.wish-card em {
+    display: inline-flex;
+    margin-top: 12px;
+    padding: 6px 9px;
+    color: #9a335e;
+    background: rgba(255, 236, 243, 0.82);
+    border-radius: 8px;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 800;
+}
+
+.wish-detail {
+    max-height: 0;
+    margin: 0;
     color: #55444f;
     font-size: 15px;
     line-height: 1.75;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: max-height 260ms ease, margin 260ms ease, opacity 260ms ease, transform 260ms ease;
+}
+
+.wish-card.is-open .wish-detail {
+    max-height: 140px;
+    margin-top: 18px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wish-card.is-open em {
+    color: #fff;
+    background: #ce3d72;
 }
 
 .birthday-footer {
@@ -476,6 +714,32 @@ body.is-birthday {
     }
 }
 
+@keyframes balloonFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(-3deg);
+    }
+    50% {
+        transform: translateY(-22px) rotate(4deg);
+    }
+}
+
+@keyframes cakeFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+@media (max-width: 1100px) {
+    .balloon-a,
+    .balloon-b,
+    .mini-cake {
+        opacity: 0.4;
+    }
+}
+
 @media (max-width: 900px) {
     .celebration-layout,
     .wish-grid {
@@ -484,6 +748,11 @@ body.is-birthday {
 
     .hero {
         min-height: auto;
+    }
+
+    .balloon-c,
+    .mini-cake {
+        display: none;
     }
 }
 
@@ -544,6 +813,22 @@ body.is-birthday {
 
     .bottom-layer {
         width: 292px;
+    }
+
+    .balloon {
+        width: 54px;
+        height: 70px;
+        opacity: 0.42;
+    }
+
+    .balloon-a {
+        top: 94px;
+        left: -12px;
+    }
+
+    .balloon-b {
+        top: 150px;
+        right: -12px;
     }
 }
 
