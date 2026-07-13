@@ -1,6 +1,6 @@
 (function () {
-    var birthdayStart = new Date(2026, 6, 17, 0, 0, 0, 0);
-    var birthdayEnd = new Date(2026, 6, 17, 23, 59, 59, 999);
+    var birthdayStart = new Date(2026, 6, 11, 0, 0, 0, 0);
+    var birthdayEnd = new Date(2026, 6, 11, 23, 59, 59, 999);
     var countdownNodes = {
         grid: document.getElementById("countdownGrid"),
         title: document.getElementById("countdownTitle"),
@@ -20,28 +20,10 @@
         "",
         "小蓝，生日快乐。新的一岁，也请继续做那个真诚、勇敢、善良、自由的你。"
     ].join("\n");
-    var birthdayMelody = [
-        ["G4", 0.38], ["G4", 0.22], ["A4", 0.58], ["G4", 0.58], ["C5", 0.58], ["B4", 1.05],
-        ["G4", 0.38], ["G4", 0.22], ["A4", 0.58], ["G4", 0.58], ["D5", 0.58], ["C5", 1.05],
-        ["G4", 0.38], ["G4", 0.22], ["G5", 0.58], ["E5", 0.58], ["C5", 0.58], ["B4", 0.58], ["A4", 1.05],
-        ["F5", 0.38], ["F5", 0.22], ["E5", 0.58], ["C5", 0.58], ["D5", 0.58], ["C5", 1.2]
-    ];
-    var noteMap = {
-        G4: 392.00,
-        A4: 440.00,
-        B4: 493.88,
-        C5: 523.25,
-        D5: 587.33,
-        E5: 659.25,
-        F5: 698.46,
-        G5: 783.99
-    };
-    var musicState = {
-        context: null,
-        timers: [],
-        nodes: [],
-        isPlaying: false
-    };
+    var birthdayAudio = document.getElementById("birthdayMusic");
+    var memoryVideo = document.getElementById("memoryVideo");
+    var birthdayAudioObjectUrl = "";
+    var memoryVideoObjectUrl = "";
     var particles = [];
     var canvas = document.getElementById("birthdayCanvas");
     var ctx = canvas.getContext("2d");
@@ -97,101 +79,124 @@
         var button = document.getElementById("musicToggle");
         var text = button.querySelector(".music-text");
 
+        button.disabled = true;
+        text.textContent = "音乐准备中";
+        loadBirthdaySong().then(function () {
+            button.disabled = false;
+            text.textContent = "开启音乐";
+        }).catch(function () {
+            text.textContent = "音乐加载失败";
+        });
+
         function setState(isPlaying) {
-            musicState.isPlaying = isPlaying;
             button.classList.toggle("is-playing", isPlaying);
             text.textContent = isPlaying ? "生日歌播放中" : "开启音乐";
+            button.setAttribute("aria-pressed", isPlaying ? "true" : "false");
         }
 
         button.addEventListener("click", function () {
-            if (musicState.isPlaying) {
-                stopBirthdaySong();
-                setState(false);
+            if (birthdayAudio.paused) {
+                if (memoryVideo && !memoryVideo.paused) {
+                    memoryVideo.pause();
+                }
+
+                birthdayAudio.play().catch(function () {
+                    setState(false);
+                    text.textContent = "点击重试音乐";
+                });
             } else {
-                setState(startBirthdaySong());
+                birthdayAudio.pause();
             }
 
             createSpark(button);
             burstParticles(20);
         });
-    }
 
-    function startBirthdaySong() {
-        stopBirthdaySong();
-
-        var AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) {
-            return false;
-        }
-
-        if (!musicState.context) {
-            musicState.context = new AudioContext();
-        }
-
-        if (musicState.context.state === "suspended") {
-            musicState.context.resume();
-        }
-
-        playMelodyLoop();
-        return true;
-    }
-
-    function playMelodyLoop() {
-        var startAt = musicState.context.currentTime + 0.05;
-        var cursor = 0;
-
-        birthdayMelody.forEach(function (item) {
-            var note = item[0];
-            var duration = item[1];
-            scheduleNote(noteMap[note], startAt + cursor, duration);
-            cursor += duration;
+        birthdayAudio.addEventListener("play", function () {
+            setState(true);
         });
-
-        var timer = setTimeout(function () {
-            if (musicState.isPlaying) {
-                playMelodyLoop();
-            }
-        }, Math.ceil((cursor + 0.8) * 1000));
-
-        musicState.timers.push(timer);
-    }
-
-    function scheduleNote(frequency, startAt, duration) {
-        var context = musicState.context;
-        var oscillator = context.createOscillator();
-        var gain = context.createGain();
-
-        oscillator.type = "triangle";
-        oscillator.frequency.setValueAtTime(frequency, startAt);
-        gain.gain.setValueAtTime(0.0001, startAt);
-        gain.gain.exponentialRampToValueAtTime(0.16, startAt + 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
-
-        oscillator.connect(gain);
-        gain.connect(context.destination);
-        oscillator.start(startAt);
-        oscillator.stop(startAt + duration + 0.05);
-        musicState.nodes.push(oscillator);
-        oscillator.onended = function () {
-            musicState.nodes = musicState.nodes.filter(function (node) {
-                return node !== oscillator;
-            });
-        };
-    }
-
-    function stopBirthdaySong() {
-        musicState.timers.forEach(function (timer) {
-            clearTimeout(timer);
+        birthdayAudio.addEventListener("pause", function () {
+            setState(false);
         });
-        musicState.timers = [];
-        musicState.nodes.forEach(function (node) {
-            try {
-                node.stop();
-            } catch (error) {
-                // The note may already have finished.
+        birthdayAudio.addEventListener("error", function () {
+            setState(false);
+            text.textContent = "音乐加载失败";
+        });
+    }
+
+    function loadBirthdaySong() {
+        var pattern = birthdayAudio.getAttribute("data-parts-pattern");
+        var count = Number(birthdayAudio.getAttribute("data-parts-count"));
+        var requests = [];
+
+        for (var index = 0; index < count; index++) {
+            var partName = String(index).padStart(2, "0");
+            var partUrl = pattern.replace("{index}", partName);
+            requests.push(fetch(partUrl).then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Birthday song part could not be loaded");
+                }
+                return response.arrayBuffer();
+            }));
+        }
+
+        return Promise.all(requests).then(function (parts) {
+            birthdayAudioObjectUrl = URL.createObjectURL(new Blob(parts, { type: "audio/mpeg" }));
+            birthdayAudio.src = birthdayAudioObjectUrl;
+            birthdayAudio.load();
+        });
+    }
+
+    function setupVideo() {
+        if (!memoryVideo) {
+            return;
+        }
+
+        memoryVideo.addEventListener("play", function () {
+            if (!birthdayAudio.paused) {
+                birthdayAudio.pause();
             }
         });
-        musicState.nodes = [];
+
+        loadMemoryVideo();
+    }
+
+    function loadMemoryVideo() {
+        var loading = document.getElementById("videoLoading");
+        var pattern = memoryVideo.getAttribute("data-parts-pattern");
+        var count = Number(memoryVideo.getAttribute("data-parts-count"));
+        var requests = [];
+
+        for (var index = 0; index < count; index++) {
+            var partName = String(index).padStart(2, "0");
+            var partUrl = pattern.replace("{index}", partName);
+            requests.push(fetch(partUrl).then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Video part could not be loaded");
+                }
+                return response.arrayBuffer();
+            }));
+        }
+
+        Promise.all(requests).then(function (parts) {
+            memoryVideoObjectUrl = URL.createObjectURL(new Blob(parts, { type: "video/mp4" }));
+            memoryVideo.addEventListener("loadedmetadata", function () {
+                loading.classList.add("is-hidden");
+            }, { once: true });
+            memoryVideo.src = memoryVideoObjectUrl;
+            memoryVideo.load();
+        }).catch(function () {
+            loading.textContent = "纪念片加载失败，请刷新页面重试";
+        });
+
+        window.addEventListener("beforeunload", function () {
+            if (birthdayAudioObjectUrl) {
+                URL.revokeObjectURL(birthdayAudioObjectUrl);
+            }
+            if (memoryVideoObjectUrl) {
+                URL.revokeObjectURL(memoryVideoObjectUrl);
+            }
+        }, { once: true });
     }
 
     function setupCake() {
@@ -411,6 +416,7 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
         setupMusic();
+        setupVideo();
         setupCake();
         setupLetterButton();
         setupWishCards();
