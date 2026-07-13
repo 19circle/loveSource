@@ -22,7 +22,6 @@
     ].join("\n");
     var birthdayAudio = document.getElementById("birthdayMusic");
     var memoryVideo = document.getElementById("memoryVideo");
-    var birthdayAudioObjectUrl = "";
     var memoryVideoObjectUrl = "";
     var particles = [];
     var canvas = document.getElementById("birthdayCanvas");
@@ -79,15 +78,6 @@
         var button = document.getElementById("musicToggle");
         var text = button.querySelector(".music-text");
 
-        button.disabled = true;
-        text.textContent = "音乐准备中";
-        loadBirthdaySong().then(function () {
-            button.disabled = false;
-            text.textContent = "开启音乐";
-        }).catch(function () {
-            text.textContent = "音乐加载失败";
-        });
-
         function setState(isPlaying) {
             button.classList.toggle("is-playing", isPlaying);
             text.textContent = isPlaying ? "生日歌播放中" : "开启音乐";
@@ -124,29 +114,6 @@
         });
     }
 
-    function loadBirthdaySong() {
-        var pattern = birthdayAudio.getAttribute("data-parts-pattern");
-        var count = Number(birthdayAudio.getAttribute("data-parts-count"));
-        var requests = [];
-
-        for (var index = 0; index < count; index++) {
-            var partName = String(index).padStart(2, "0");
-            var partUrl = pattern.replace("{index}", partName);
-            requests.push(fetch(partUrl).then(function (response) {
-                if (!response.ok) {
-                    throw new Error("Birthday song part could not be loaded");
-                }
-                return response.arrayBuffer();
-            }));
-        }
-
-        return Promise.all(requests).then(function (parts) {
-            birthdayAudioObjectUrl = URL.createObjectURL(new Blob(parts, { type: "audio/mpeg" }));
-            birthdayAudio.src = birthdayAudioObjectUrl;
-            birthdayAudio.load();
-        });
-    }
-
     function setupVideo() {
         if (!memoryVideo) {
             return;
@@ -158,7 +125,24 @@
             }
         });
 
-        loadMemoryVideo();
+        if (window.matchMedia("(max-width: 820px), (pointer: coarse)").matches) {
+            loadMobileVideo();
+        } else {
+            loadMemoryVideo();
+        }
+    }
+
+    function loadMobileVideo() {
+        var loading = document.getElementById("videoLoading");
+
+        memoryVideo.addEventListener("loadedmetadata", function () {
+            loading.classList.add("is-hidden");
+        }, { once: true });
+        memoryVideo.addEventListener("error", function () {
+            loading.textContent = "纪念片加载失败，请刷新页面重试";
+        }, { once: true });
+        memoryVideo.src = memoryVideo.getAttribute("data-mobile-src");
+        memoryVideo.load();
     }
 
     function loadMemoryVideo() {
@@ -190,9 +174,6 @@
         });
 
         window.addEventListener("beforeunload", function () {
-            if (birthdayAudioObjectUrl) {
-                URL.revokeObjectURL(birthdayAudioObjectUrl);
-            }
             if (memoryVideoObjectUrl) {
                 URL.revokeObjectURL(memoryVideoObjectUrl);
             }
