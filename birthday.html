@@ -9,6 +9,8 @@
 </head>
 <body>
 <canvas id="birthdayCanvas" aria-hidden="true"></canvas>
+<audio id="birthdayMusic" preload="none" loop
+	data-parts-pattern="media/birthday-song-parts/part-{index}.bin" data-parts-count="2"></audio>
 
 <div class="party-decor" aria-hidden="true">
 	<div class="balloon balloon-a"><span></span></div>
@@ -77,16 +79,30 @@
 				<h2 id="cakeTitle">生日蛋糕和小小愿望</h2>
 			</div>
 			<div class="cake" aria-hidden="true">
+				<div class="cake-glow"></div>
 				<div class="candles">
 					<span class="candle"><span class="flame"></span></span>
 					<span class="candle"><span class="flame"></span></span>
 					<span class="candle"><span class="flame"></span></span>
 				</div>
-				<div class="icing"></div>
-				<div class="sprinkles"></div>
-				<div class="cake-layer top-layer"></div>
-				<div class="cake-layer middle-layer"></div>
-				<div class="cake-layer bottom-layer"></div>
+				<div class="cake-top">
+					<span class="cream-swirl swirl-one"></span>
+					<span class="cream-swirl swirl-two"></span>
+					<span class="cream-swirl swirl-three"></span>
+					<span class="strawberry berry-one"></span>
+					<span class="strawberry berry-two"></span>
+					<span class="strawberry berry-three"></span>
+				</div>
+				<div class="cake-body">
+					<div class="icing-drip drip-one"></div>
+					<div class="icing-drip drip-two"></div>
+					<div class="icing-drip drip-three"></div>
+					<div class="icing-drip drip-four"></div>
+					<div class="cake-filling filling-one"></div>
+					<div class="cake-filling filling-two"></div>
+					<div class="cake-message">Happy Birthday</div>
+					<div class="bottom-piping"></div>
+				</div>
 				<div class="plate"></div>
 			</div>
 			<button id="wishButton" class="wish-button" type="button">点亮生日愿望</button>
@@ -112,6 +128,21 @@
 					<p>都能想起这个夏天，也想起这份认真准备过的祝福。</p>
 				</li>
 			</ol>
+		</div>
+	</section>
+
+	<section class="video-section" aria-labelledby="videoTitle">
+		<div class="section-heading video-heading">
+			<p class="eyebrow">Our Little Movie</p>
+			<h2 id="videoTitle">给小蓝的温暖情侣纪念片</h2>
+			<p>把我们一起走过的画面，留在这一次生日里。</p>
+		</div>
+		<div class="video-frame">
+			<div id="videoLoading" class="video-loading">纪念片正在准备中...</div>
+			<video id="memoryVideo" controls playsinline preload="metadata" poster="media/memory-video-poster.jpg"
+				data-parts-pattern="media/memory-video-parts/part-{index}.bin" data-parts-count="9">
+				你的浏览器暂不支持视频播放。
+			</video>
 		</div>
 	</section>
 
