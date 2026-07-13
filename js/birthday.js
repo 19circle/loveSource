@@ -123,7 +123,9 @@
         var playButton = document.getElementById("videoPlayButton");
         var fallbackSource = memoryVideo.getAttribute("data-mobile-src");
         var hlsSource = memoryVideo.getAttribute("data-hls-src");
+        var hlsFallbackSource = memoryVideo.getAttribute("data-hls-fallback");
         var fatalErrorCount = 0;
+        var usingHlsFallback = false;
         var prefersNativeHls = memoryVideo.canPlayType("application/vnd.apple.mpegurl")
             && /AppleWebKit/.test(navigator.userAgent)
             && !/(Chrome|Chromium|Edg)/.test(navigator.userAgent);
@@ -142,6 +144,21 @@
 
             setVideoState("网络较慢，正在切换兼容视频...", false);
             memoryVideo.src = fallbackSource;
+            memoryVideo.load();
+        }
+
+        function loadNativeHls(source, isFallback) {
+            memoryVideo.dataset.videoSource = isFallback ? "github-hd" : "cos-hd";
+            memoryVideo.addEventListener("error", function () {
+                if (!isFallback && hlsFallbackSource) {
+                    setVideoState("COS 高清线路波动，正在切换备用高清线路...", false);
+                    loadNativeHls(hlsFallbackSource, true);
+                    return;
+                }
+
+                restoreFallback();
+            }, { once: true });
+            memoryVideo.src = source;
             memoryVideo.load();
         }
 
@@ -187,9 +204,7 @@
         });
 
         if (prefersNativeHls) {
-            memoryVideo.addEventListener("error", restoreFallback, { once: true });
-            memoryVideo.src = hlsSource;
-            memoryVideo.load();
+            loadNativeHls(hlsSource, false);
         } else if (window.Hls && window.Hls.isSupported()) {
             memoryHls = new window.Hls({
                 enableWorker: true,
@@ -202,6 +217,7 @@
             });
             memoryHls.on(window.Hls.Events.MANIFEST_PARSED, function () {
                 memoryVideo.dataset.streamReady = "true";
+                memoryVideo.dataset.videoSource = usingHlsFallback ? "github-hd" : "cos-hd";
             });
             memoryHls.on(window.Hls.Events.LEVEL_SWITCHED, function (event, data) {
                 var level = memoryHls.levels[data.level];
@@ -223,6 +239,15 @@
                 if (fatalErrorCount === 1 && data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
                     setVideoState("高清纪念片正在恢复播放...", false);
                     memoryHls.recoverMediaError();
+                    return;
+                }
+
+                if (!usingHlsFallback && hlsFallbackSource) {
+                    usingHlsFallback = true;
+                    fatalErrorCount = 0;
+                    setVideoState("COS 高清线路波动，正在切换备用高清线路...", false);
+                    memoryHls.loadSource(hlsFallbackSource);
+                    memoryHls.startLoad();
                     return;
                 }
 
