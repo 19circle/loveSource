@@ -9,8 +9,7 @@
 </head>
 <body>
 <canvas id="birthdayCanvas" aria-hidden="true"></canvas>
-<audio id="birthdayMusic" preload="none" loop
-	data-parts-pattern="media/birthday-song-parts/part-{index}.bin" data-parts-count="2"></audio>
+<audio id="birthdayMusic" src="media/birthday-song-mobile.mp3" preload="metadata" loop></audio>
 
 <div class="party-decor" aria-hidden="true">
 	<div class="balloon balloon-a"><span></span></div>
@@ -140,6 +139,7 @@
 		<div class="video-frame">
 			<div id="videoLoading" class="video-loading">纪念片正在准备中...</div>
 			<video id="memoryVideo" controls playsinline preload="metadata" poster="media/memory-video-poster.jpg"
+				data-mobile-src="media/memory-video-mobile.mp4"
 				data-parts-pattern="media/memory-video-parts/part-{index}.bin" data-parts-count="9">
 				你的浏览器暂不支持视频播放。
 			</video>
