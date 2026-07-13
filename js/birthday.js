@@ -22,7 +22,7 @@
     ].join("\n");
     var birthdayAudio = document.getElementById("birthdayMusic");
     var memoryVideo = document.getElementById("memoryVideo");
-    var memoryVideoObjectUrl = "";
+    var memoryHls = null;
     var particles = [];
     var canvas = document.getElementById("birthdayCanvas");
     var ctx = canvas.getContext("2d");
@@ -125,99 +125,74 @@
             }
         });
 
-        var isMobile = window.matchMedia("(max-width: 820px), (pointer: coarse)").matches;
-        loadBaseVideo(!isMobile);
+        loadBaseVideo();
 
         window.addEventListener("beforeunload", function () {
-            if (memoryVideoObjectUrl) {
-                URL.revokeObjectURL(memoryVideoObjectUrl);
+            if (memoryHls) {
+                memoryHls.destroy();
             }
         }, { once: true });
     }
 
-    function loadBaseVideo(shouldUpgrade) {
+    function loadBaseVideo() {
         var loading = document.getElementById("videoLoading");
+        var fallbackSource = memoryVideo.getAttribute("data-mobile-src");
+
+        function handleBaseError() {
+            loading.textContent = "纪念片加载失败，请刷新页面重试";
+        }
 
         memoryVideo.addEventListener("loadedmetadata", function () {
+            memoryVideo.removeEventListener("error", handleBaseError);
             loading.classList.add("is-hidden");
-
-            if (shouldUpgrade) {
-                loadMemoryVideo();
-            }
+            loadHighQualityVideo(fallbackSource);
         }, { once: true });
-        memoryVideo.addEventListener("error", function () {
-            loading.textContent = "纪念片加载失败，请刷新页面重试";
-        }, { once: true });
-        memoryVideo.src = memoryVideo.getAttribute("data-mobile-src");
+        memoryVideo.addEventListener("error", handleBaseError, { once: true });
+        memoryVideo.src = fallbackSource;
         memoryVideo.load();
     }
 
-    function loadMemoryVideo() {
-        var pattern = memoryVideo.getAttribute("data-parts-pattern");
-        var count = Number(memoryVideo.getAttribute("data-parts-count"));
-        var parts = [];
-        var sequence = Promise.resolve();
+    function loadHighQualityVideo(fallbackSource) {
+        var hlsSource = memoryVideo.getAttribute("data-hls-src");
 
-        for (var index = 0; index < count; index++) {
-            var partName = String(index).padStart(2, "0");
-            var partUrl = pattern.replace("{index}", partName);
-            sequence = appendVideoPart(sequence, partUrl, parts);
+        if (!memoryVideo.paused || memoryVideo.currentTime > 0) {
+            return;
         }
 
-        sequence.then(function () {
-            if (!memoryVideo.paused || memoryVideo.currentTime > 0) {
-                return;
+        function restoreFallback() {
+            if (memoryHls) {
+                memoryHls.destroy();
+                memoryHls = null;
             }
-
-            var fallbackSource = memoryVideo.getAttribute("data-mobile-src");
-            memoryVideoObjectUrl = URL.createObjectURL(new Blob(parts, { type: "video/mp4" }));
-
-            function restoreFallback() {
-                URL.revokeObjectURL(memoryVideoObjectUrl);
-                memoryVideoObjectUrl = "";
-                memoryVideo.src = fallbackSource;
-                memoryVideo.load();
-            }
-
-            function finishUpgrade() {
-                memoryVideo.removeEventListener("error", restoreFallback);
-            }
-
-            memoryVideo.addEventListener("loadedmetadata", finishUpgrade, { once: true });
-            memoryVideo.addEventListener("error", restoreFallback, { once: true });
-            memoryVideo.src = memoryVideoObjectUrl;
+            memoryVideo.src = fallbackSource;
             memoryVideo.load();
-        }).catch(function () {
-            // The directly playable fallback remains available.
+        }
+
+        if (memoryVideo.canPlayType("application/vnd.apple.mpegurl")) {
+            memoryVideo.addEventListener("error", restoreFallback, { once: true });
+            memoryVideo.src = hlsSource;
+            memoryVideo.load();
+            return;
+        }
+
+        if (!window.Hls || !window.Hls.isSupported()) {
+            return;
+        }
+
+        memoryHls = new window.Hls({
+            enableWorker: true,
+            maxBufferLength: 30,
+            backBufferLength: 30
         });
-    }
-
-    function appendVideoPart(sequence, partUrl, parts) {
-        return sequence.then(function () {
-            return fetchVideoPart(partUrl, 3);
-        }).then(function (part) {
-            parts.push(part);
+        memoryHls.on(window.Hls.Events.MEDIA_ATTACHED, function () {
+            memoryHls.loadSource(hlsSource);
         });
-    }
-
-    function fetchVideoPart(partUrl, attemptsLeft) {
-        var requestUrl = attemptsLeft === 3
-            ? partUrl
-            : partUrl + "?retry=" + Date.now();
-
-        return fetch(requestUrl, {
-            cache: attemptsLeft === 3 ? "force-cache" : "no-store"
-        }).then(function (response) {
-            if (!response.ok) {
-                throw new Error("Video part could not be loaded");
+        memoryHls.on(window.Hls.Events.ERROR, function (event, data) {
+            if (data.fatal) {
+                restoreFallback();
             }
-            return response.arrayBuffer();
-        }).catch(function (error) {
-            if (attemptsLeft > 1) {
-                return fetchVideoPart(partUrl, attemptsLeft - 1);
-            }
-            throw error;
         });
+        memoryHls.attachMedia(memoryVideo);
     }
 
     function setupCake() {
