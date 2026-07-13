@@ -4,9 +4,9 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>小蓝 2026 生日快乐</title>
-	<link href="css/birthday.css" rel="stylesheet">
+	<link href="css/birthday.css?v=20260714-playback6" rel="stylesheet">
 	<script src="js/vendor/hls.min.js?v=1.6.16" defer></script>
-	<script src="js/birthday.js?v=20260713-hd4" defer></script>
+	<script src="js/birthday.js?v=20260714-playback6" defer></script>
 </head>
 <body>
 <canvas id="birthdayCanvas" aria-hidden="true"></canvas>
@@ -138,11 +138,13 @@
 			<p>把我们一起走过的画面，留在这一次生日里。</p>
 		</div>
 		<div class="video-frame">
-			<div id="videoLoading" class="video-loading">纪念片正在准备中...</div>
+			<div id="videoLoading" class="video-loading" aria-live="polite">纪念片正在连接中...</div>
+			<button id="videoPlayButton" class="video-play-button" type="button" aria-label="播放纪念片" title="播放纪念片">
+				<span aria-hidden="true">▶</span>
+			</button>
 			<video id="memoryVideo" controls playsinline preload="metadata" poster="media/memory-video-poster.jpg"
 				data-mobile-src="media/memory-video-mobile.mp4"
-				data-hls-src="media/birthday-hls/playlist.m3u8"
-				data-parts-pattern="media/memory-video-parts/part-{index}.bin" data-parts-count="9">
+				data-hls-src="media/birthday-hls/playlist.m3u8">
 				你的浏览器暂不支持视频播放。
 			</video>
 		</div>

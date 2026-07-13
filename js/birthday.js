@@ -119,44 +119,19 @@
             return;
         }
 
-        memoryVideo.addEventListener("play", function () {
-            if (!birthdayAudio.paused) {
-                birthdayAudio.pause();
-            }
-        });
-
-        loadBaseVideo();
-
-        window.addEventListener("beforeunload", function () {
-            if (memoryHls) {
-                memoryHls.destroy();
-            }
-        }, { once: true });
-    }
-
-    function loadBaseVideo() {
         var loading = document.getElementById("videoLoading");
+        var playButton = document.getElementById("videoPlayButton");
         var fallbackSource = memoryVideo.getAttribute("data-mobile-src");
-
-        function handleBaseError() {
-            loading.textContent = "纪念片加载失败，请刷新页面重试";
-        }
-
-        memoryVideo.addEventListener("loadedmetadata", function () {
-            memoryVideo.removeEventListener("error", handleBaseError);
-            loading.classList.add("is-hidden");
-            loadHighQualityVideo(fallbackSource);
-        }, { once: true });
-        memoryVideo.addEventListener("error", handleBaseError, { once: true });
-        memoryVideo.src = fallbackSource;
-        memoryVideo.load();
-    }
-
-    function loadHighQualityVideo(fallbackSource) {
         var hlsSource = memoryVideo.getAttribute("data-hls-src");
+        var fatalErrorCount = 0;
+        var prefersNativeHls = memoryVideo.canPlayType("application/vnd.apple.mpegurl")
+            && /AppleWebKit/.test(navigator.userAgent)
+            && !/(Chrome|Chromium|Edg)/.test(navigator.userAgent);
 
-        if (!memoryVideo.paused || memoryVideo.currentTime > 0) {
-            return;
+        function setVideoState(message, isHidden) {
+            loading.textContent = message;
+            loading.classList.toggle("is-hidden", isHidden);
+            memoryVideo.dataset.videoState = isHidden ? "ready" : "loading";
         }
 
         function restoreFallback() {
@@ -164,35 +139,105 @@
                 memoryHls.destroy();
                 memoryHls = null;
             }
+
+            setVideoState("网络较慢，正在切换兼容视频...", false);
             memoryVideo.src = fallbackSource;
             memoryVideo.load();
         }
 
-        if (memoryVideo.canPlayType("application/vnd.apple.mpegurl")) {
+        playButton.addEventListener("click", function () {
+            setVideoState("高清纪念片正在缓冲，请稍候...", false);
+            memoryVideo.play().catch(function (error) {
+                memoryVideo.dataset.playError = error.name || "PlayError";
+                setVideoState("播放未能开始，请再点一次播放按钮", false);
+                playButton.classList.remove("is-hidden");
+            });
+        });
+
+        memoryVideo.addEventListener("play", function () {
+            if (!birthdayAudio.paused) {
+                birthdayAudio.pause();
+            }
+
+            if (memoryVideo.readyState < 3) {
+                setVideoState("高清纪念片正在缓冲，请稍候...", false);
+            }
+        });
+        memoryVideo.addEventListener("playing", function () {
+            setVideoState("", true);
+            playButton.classList.add("is-hidden");
+        });
+        memoryVideo.addEventListener("canplay", function () {
+            setVideoState("", true);
+        });
+        memoryVideo.addEventListener("waiting", function () {
+            if (!memoryVideo.paused && !memoryVideo.ended) {
+                setVideoState("网络波动，高清纪念片正在继续缓冲...", false);
+            }
+        });
+        memoryVideo.addEventListener("stalled", function () {
+            if (!memoryVideo.paused && !memoryVideo.ended) {
+                setVideoState("网络较慢，高清纪念片正在继续缓冲...", false);
+            }
+        });
+        memoryVideo.addEventListener("ended", function () {
+            playButton.classList.remove("is-hidden");
+            playButton.setAttribute("aria-label", "重新播放纪念片");
+            playButton.setAttribute("title", "重新播放纪念片");
+        });
+
+        if (prefersNativeHls) {
             memoryVideo.addEventListener("error", restoreFallback, { once: true });
             memoryVideo.src = hlsSource;
             memoryVideo.load();
-            return;
-        }
+        } else if (window.Hls && window.Hls.isSupported()) {
+            memoryHls = new window.Hls({
+                enableWorker: true,
+                maxBufferLength: 20,
+                maxMaxBufferLength: 30,
+                backBufferLength: 10
+            });
+            memoryHls.on(window.Hls.Events.MEDIA_ATTACHED, function () {
+                memoryHls.loadSource(hlsSource);
+            });
+            memoryHls.on(window.Hls.Events.MANIFEST_PARSED, function () {
+                memoryVideo.dataset.streamReady = "true";
+            });
+            memoryHls.on(window.Hls.Events.LEVEL_SWITCHED, function (event, data) {
+                var level = memoryHls.levels[data.level];
+                if (level && level.height) {
+                    memoryVideo.dataset.quality = level.height + "p";
+                }
+            });
+            memoryHls.on(window.Hls.Events.ERROR, function (event, data) {
+                if (!data.fatal) {
+                    return;
+                }
 
-        if (!window.Hls || !window.Hls.isSupported()) {
-            return;
-        }
+                fatalErrorCount += 1;
+                if (fatalErrorCount === 1 && data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
+                    setVideoState("高清线路连接波动，正在重试...", false);
+                    memoryHls.startLoad();
+                    return;
+                }
+                if (fatalErrorCount === 1 && data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
+                    setVideoState("高清纪念片正在恢复播放...", false);
+                    memoryHls.recoverMediaError();
+                    return;
+                }
 
-        memoryHls = new window.Hls({
-            enableWorker: true,
-            maxBufferLength: 30,
-            backBufferLength: 30
-        });
-        memoryHls.on(window.Hls.Events.MEDIA_ATTACHED, function () {
-            memoryHls.loadSource(hlsSource);
-        });
-        memoryHls.on(window.Hls.Events.ERROR, function (event, data) {
-            if (data.fatal) {
                 restoreFallback();
+            });
+            memoryHls.attachMedia(memoryVideo);
+        } else {
+            restoreFallback();
+        }
+
+        window.addEventListener("beforeunload", function () {
+            if (memoryHls) {
+                memoryHls.destroy();
             }
-        });
-        memoryHls.attachMedia(memoryVideo);
+        }, { once: true });
     }
 
     function setupCake() {

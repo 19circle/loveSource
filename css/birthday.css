@@ -699,7 +699,7 @@ body.is-birthday {
     z-index: 2;
     display: grid;
     place-items: center;
-    padding: 20px;
+    padding: 110px 20px 20px;
     color: #fff8fb;
     background: rgba(33, 26, 32, 0.72);
     font-size: 14px;
@@ -712,6 +712,54 @@ body.is-birthday {
 .video-loading.is-hidden {
     opacity: 0;
     visibility: hidden;
+}
+
+.video-play-button {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 3;
+    display: grid;
+    width: 68px;
+    height: 68px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    border-radius: 50%;
+    color: #ffffff;
+    background: rgba(30, 22, 28, 0.72);
+    box-shadow: 0 8px 24px rgba(26, 17, 22, 0.3);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: background 180ms ease, opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+}
+
+.video-play-button span {
+    margin-left: 4px;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.video-play-button:hover,
+.video-play-button:focus-visible {
+    background: rgba(190, 55, 103, 0.9);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.video-play-button.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+@media (max-width: 520px) {
+    .video-play-button {
+        width: 58px;
+        height: 58px;
+    }
+
+    .video-play-button span {
+        font-size: 24px;
+    }
 }
 
 .letter-band[hidden] {
