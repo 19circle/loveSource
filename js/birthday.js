@@ -125,18 +125,25 @@
             }
         });
 
-        if (window.matchMedia("(max-width: 820px), (pointer: coarse)").matches) {
-            loadMobileVideo();
-        } else {
-            loadMemoryVideo();
-        }
+        var isMobile = window.matchMedia("(max-width: 820px), (pointer: coarse)").matches;
+        loadBaseVideo(!isMobile);
+
+        window.addEventListener("beforeunload", function () {
+            if (memoryVideoObjectUrl) {
+                URL.revokeObjectURL(memoryVideoObjectUrl);
+            }
+        }, { once: true });
     }
 
-    function loadMobileVideo() {
+    function loadBaseVideo(shouldUpgrade) {
         var loading = document.getElementById("videoLoading");
 
         memoryVideo.addEventListener("loadedmetadata", function () {
             loading.classList.add("is-hidden");
+
+            if (shouldUpgrade) {
+                loadMemoryVideo();
+            }
         }, { once: true });
         memoryVideo.addEventListener("error", function () {
             loading.textContent = "纪念片加载失败，请刷新页面重试";
@@ -146,38 +153,71 @@
     }
 
     function loadMemoryVideo() {
-        var loading = document.getElementById("videoLoading");
         var pattern = memoryVideo.getAttribute("data-parts-pattern");
         var count = Number(memoryVideo.getAttribute("data-parts-count"));
-        var requests = [];
+        var parts = [];
+        var sequence = Promise.resolve();
 
         for (var index = 0; index < count; index++) {
             var partName = String(index).padStart(2, "0");
             var partUrl = pattern.replace("{index}", partName);
-            requests.push(fetch(partUrl).then(function (response) {
-                if (!response.ok) {
-                    throw new Error("Video part could not be loaded");
-                }
-                return response.arrayBuffer();
-            }));
+            sequence = appendVideoPart(sequence, partUrl, parts);
         }
 
-        Promise.all(requests).then(function (parts) {
+        sequence.then(function () {
+            if (!memoryVideo.paused || memoryVideo.currentTime > 0) {
+                return;
+            }
+
+            var fallbackSource = memoryVideo.getAttribute("data-mobile-src");
             memoryVideoObjectUrl = URL.createObjectURL(new Blob(parts, { type: "video/mp4" }));
-            memoryVideo.addEventListener("loadedmetadata", function () {
-                loading.classList.add("is-hidden");
-            }, { once: true });
+
+            function restoreFallback() {
+                URL.revokeObjectURL(memoryVideoObjectUrl);
+                memoryVideoObjectUrl = "";
+                memoryVideo.src = fallbackSource;
+                memoryVideo.load();
+            }
+
+            function finishUpgrade() {
+                memoryVideo.removeEventListener("error", restoreFallback);
+            }
+
+            memoryVideo.addEventListener("loadedmetadata", finishUpgrade, { once: true });
+            memoryVideo.addEventListener("error", restoreFallback, { once: true });
             memoryVideo.src = memoryVideoObjectUrl;
             memoryVideo.load();
         }).catch(function () {
-            loading.textContent = "纪念片加载失败，请刷新页面重试";
+            // The directly playable fallback remains available.
         });
+    }
 
-        window.addEventListener("beforeunload", function () {
-            if (memoryVideoObjectUrl) {
-                URL.revokeObjectURL(memoryVideoObjectUrl);
+    function appendVideoPart(sequence, partUrl, parts) {
+        return sequence.then(function () {
+            return fetchVideoPart(partUrl, 3);
+        }).then(function (part) {
+            parts.push(part);
+        });
+    }
+
+    function fetchVideoPart(partUrl, attemptsLeft) {
+        var requestUrl = attemptsLeft === 3
+            ? partUrl
+            : partUrl + "?retry=" + Date.now();
+
+        return fetch(requestUrl, {
+            cache: attemptsLeft === 3 ? "force-cache" : "no-store"
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error("Video part could not be loaded");
             }
-        }, { once: true });
+            return response.arrayBuffer();
+        }).catch(function (error) {
+            if (attemptsLeft > 1) {
+                return fetchVideoPart(partUrl, attemptsLeft - 1);
+            }
+            throw error;
+        });
     }
 
     function setupCake() {
