@@ -767,12 +767,34 @@ body.is-birthday {
 }
 
 .letter-text {
+    width: min(100%, 42em);
     min-height: 220px;
-    margin-top: 20px;
+    margin: 24px auto 0;
     color: #413540;
-    font-size: clamp(16px, 2vw, 18px);
-    line-height: 2;
-    white-space: pre-line;
+    font-size: 18px;
+    line-height: 1.95;
+    line-break: strict;
+    overflow-wrap: break-word;
+}
+
+.letter-paragraph {
+    margin: 0 0 1.1em;
+    text-align: justify;
+    text-indent: 2em;
+    text-justify: inter-ideograph;
+}
+
+.letter-paragraph:first-child {
+    text-indent: 0;
+}
+
+.letter-paragraph:last-child {
+    margin-bottom: 0;
+}
+
+.letter-spacer {
+    height: 0.35em;
+    margin: 0;
 }
 
 .letter-cursor {
@@ -1000,6 +1022,22 @@ body.is-birthday {
     .hero-actions {
         display: grid;
         grid-template-columns: 1fr;
+    }
+
+    .letter-band {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .letter-text {
+        min-height: 180px;
+        margin-top: 18px;
+        font-size: 16px;
+        line-height: 1.9;
+    }
+
+    .letter-paragraph {
+        margin-bottom: 1em;
     }
 
     .countdown-grid {

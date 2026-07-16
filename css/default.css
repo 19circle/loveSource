@@ -164,13 +164,41 @@ body {
 }
 
 .site-footer .footer-link {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 18px;
+    border: 1px solid rgba(154, 51, 94, 0.24);
+    border-radius: 8px;
     color: #9a335e;
+    background: rgba(255, 247, 250, 0.92);
+    box-shadow: 0 8px 22px rgba(116, 48, 77, 0.12);
+    font-size: 15px;
     font-weight: 700;
     text-decoration: none;
+    transition: color 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
-.site-footer .footer-link:hover {
-    text-decoration: underline;
+.site-footer .footer-link::after {
+    content: "→";
+    font-size: 18px;
+    line-height: 1;
+}
+
+.site-footer .footer-link:hover,
+.site-footer .footer-link:focus-visible {
+    border-color: rgba(154, 51, 94, 0.48);
+    color: #7d234b;
+    background: #ffffff;
+    box-shadow: 0 10px 26px rgba(116, 48, 77, 0.17);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+.site-footer .footer-link:active {
+    transform: translateY(0);
 }
 
 #loveHeartButton {
@@ -314,10 +342,22 @@ body {
         width: min(100%, 220px);
         justify-content: center;
     }
+
+    .site-footer .birthday-entry {
+        margin-top: 12px;
+    }
+
+    .site-footer .footer-link {
+        width: min(100%, 320px);
+        min-height: 52px;
+        padding: 12px 16px;
+        font-size: 16px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     #musicToggle,
+    .site-footer .footer-link,
     .music-heart,
     .floating-heart {
         animation: none !important;

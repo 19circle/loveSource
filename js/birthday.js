@@ -328,29 +328,83 @@
 
     function typeLetter() {
         var container = document.getElementById("letterText");
-        var index = 0;
-        var cursor = '<span class="letter-cursor">_</span>';
+        var paragraphs = letter.split("\n");
+        var paragraphIndex = 0;
+        var characterIndex = 0;
+        var currentParagraph = null;
+        var cursor = document.createElement("span");
+
+        cursor.className = "letter-cursor";
+        cursor.textContent = "_";
+        container.textContent = "";
+        container.setAttribute("aria-busy", "true");
+        container.setAttribute("aria-live", "off");
 
         if (reducedMotion) {
-            container.textContent = letter;
+            renderLetter(container, paragraphs);
+            container.setAttribute("aria-busy", "false");
+            container.setAttribute("aria-live", "polite");
             return;
         }
 
-        var timer = setInterval(function () {
-            index += 1;
-            container.innerHTML = escapeHtml(letter.slice(0, index)) + cursor;
-            if (index >= letter.length) {
-                clearInterval(timer);
-                container.textContent = letter;
+        function prepareParagraph() {
+            while (paragraphIndex < paragraphs.length && paragraphs[paragraphIndex] === "") {
+                var spacer = document.createElement("p");
+                spacer.className = "letter-spacer";
+                spacer.setAttribute("aria-hidden", "true");
+                container.appendChild(spacer);
+                paragraphIndex += 1;
             }
-        }, 46);
+
+            if (paragraphIndex >= paragraphs.length) {
+                return false;
+            }
+
+            currentParagraph = document.createElement("p");
+            currentParagraph.className = "letter-paragraph";
+            currentParagraph.appendChild(cursor);
+            container.appendChild(currentParagraph);
+            return true;
+        }
+
+        prepareParagraph();
+        var timer = setInterval(function () {
+            var paragraph = paragraphs[paragraphIndex];
+            currentParagraph.insertBefore(document.createTextNode(paragraph.charAt(characterIndex)), cursor);
+            characterIndex += 1;
+
+            if (characterIndex >= paragraph.length) {
+                cursor.remove();
+                paragraphIndex += 1;
+                characterIndex = 0;
+
+                if (paragraphIndex < paragraphs.length && prepareParagraph()) {
+                    return;
+                }
+
+                clearInterval(timer);
+                container.setAttribute("aria-busy", "false");
+                container.setAttribute("aria-live", "polite");
+            }
+        }, 42);
     }
 
-    function escapeHtml(value) {
-        return value
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
+    function renderLetter(container, paragraphs) {
+        var fragment = document.createDocumentFragment();
+
+        paragraphs.forEach(function (paragraph) {
+            var node = document.createElement("p");
+            node.className = paragraph ? "letter-paragraph" : "letter-spacer";
+            if (paragraph) {
+                node.textContent = paragraph;
+            } else {
+                node.setAttribute("aria-hidden", "true");
+            }
+            fragment.appendChild(node);
+        });
+
+        container.textContent = "";
+        container.appendChild(fragment);
     }
 
     function createSpark(target) {
