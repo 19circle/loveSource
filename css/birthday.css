@@ -317,7 +317,8 @@ body.is-birthday {
 .cake-stage,
 .memory-panel,
 .wish-section,
-.video-section {
+.video-section,
+.bouquet-section {
     border: 1px solid rgba(176, 77, 117, 0.18);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.74);
@@ -389,7 +390,8 @@ body.is-birthday {
 .memory-panel,
 .letter-band,
 .wish-section,
-.video-section {
+.video-section,
+.bouquet-section {
     padding: clamp(22px, 4vw, 34px);
 }
 
@@ -803,6 +805,169 @@ body.is-birthday {
     animation: cursorBlink 900ms steps(2, start) infinite;
 }
 
+.bouquet-section {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(260px, 0.82fr) minmax(340px, 1.18fr);
+    align-items: center;
+    gap: clamp(12px, 4vw, 48px);
+    min-height: 520px;
+    margin-top: 26px;
+    overflow: hidden;
+    background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.86), rgba(255, 241, 247, 0.78) 62%, rgba(239, 248, 243, 0.72));
+}
+
+.bouquet-copy {
+    position: relative;
+    z-index: 2;
+    max-width: 430px;
+}
+
+.bouquet-copy h2 {
+    margin: 0;
+    color: #49313e;
+    font-size: clamp(26px, 3.6vw, 40px);
+    line-height: 1.25;
+    letter-spacing: 0;
+}
+
+.bouquet-intro {
+    margin: 18px 0 0;
+    color: #65515d;
+    font-size: 16px;
+    line-height: 1.9;
+}
+
+.bouquet-button {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 12px 20px;
+    border: 1px solid rgba(171, 58, 103, 0.24);
+    border-radius: 8px;
+    color: #fff;
+    background: #c83d70;
+    box-shadow: 0 12px 24px rgba(171, 58, 103, 0.2);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.bouquet-button:hover,
+.bouquet-button:focus-visible {
+    background: #ad2f5e;
+    box-shadow: 0 14px 28px rgba(171, 58, 103, 0.28);
+    transform: translateY(-2px);
+}
+
+.bouquet-button:focus-visible {
+    outline: 3px solid rgba(200, 61, 112, 0.24);
+    outline-offset: 3px;
+}
+
+.bouquet-button:disabled {
+    color: #6f5260;
+    background: rgba(255, 255, 255, 0.78);
+    box-shadow: none;
+    cursor: default;
+    transform: none;
+}
+
+.bouquet-button-mark {
+    position: relative;
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+}
+
+.bouquet-button-mark::before,
+.bouquet-button-mark::after {
+    content: "";
+    position: absolute;
+}
+
+.bouquet-button-mark::before {
+    left: 6px;
+    top: 5px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 -5px 0 -1px currentColor, 5px 0 0 -1px currentColor, 0 5px 0 -1px currentColor, -5px 0 0 -1px currentColor;
+}
+
+.bouquet-button-mark::after {
+    left: 8px;
+    top: 11px;
+    width: 2px;
+    height: 7px;
+    border-radius: 2px;
+    background: currentColor;
+    transform: rotate(-18deg);
+    transform-origin: top;
+}
+
+.bouquet-message {
+    min-height: 26px;
+    margin: 14px 0 0;
+    color: #876471;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.bouquet-visual {
+    position: relative;
+    min-height: 450px;
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+}
+
+.bouquet-visual img {
+    position: absolute;
+    left: 50%;
+    bottom: -38px;
+    z-index: 1;
+    display: block;
+    width: min(500px, 108%);
+    height: auto;
+    filter: drop-shadow(0 24px 24px rgba(99, 55, 71, 0.17));
+    opacity: 0.86;
+    clip-path: inset(58% 8% 0 8% round 10px);
+    transform: translateX(-50%) translateY(54px) scale(0.9);
+    transform-origin: center bottom;
+    transition: clip-path 900ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 700ms ease, transform 900ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 900ms ease;
+}
+
+.bouquet-section.is-received .bouquet-visual img {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 0);
+    filter: drop-shadow(0 30px 28px rgba(99, 55, 71, 0.22));
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.falling-petal {
+    position: absolute;
+    left: var(--petal-left);
+    top: 5%;
+    z-index: 3;
+    width: var(--petal-size);
+    height: calc(var(--petal-size) * 0.72);
+    border-radius: 70% 30% 70% 30%;
+    background: var(--petal-color);
+    box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+    opacity: 0;
+    transform: rotate(var(--petal-rotate));
+    animation: bouquetPetalFall var(--petal-duration) var(--petal-delay) ease-in forwards;
+}
+
 .wish-section {
     margin-top: 26px;
 }
@@ -969,6 +1134,20 @@ body.is-birthday {
     }
 }
 
+@keyframes bouquetPetalFall {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -16px, 0) rotate(var(--petal-rotate));
+    }
+    12% {
+        opacity: 0.9;
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--petal-drift), 390px, 0) rotate(calc(var(--petal-rotate) + 240deg));
+    }
+}
+
 @media (max-width: 1100px) {
     .balloon-a,
     .balloon-b,
@@ -979,8 +1158,21 @@ body.is-birthday {
 
 @media (max-width: 900px) {
     .celebration-layout,
-    .wish-grid {
+    .wish-grid,
+    .bouquet-section {
         grid-template-columns: 1fr;
+    }
+
+    .bouquet-section {
+        min-height: auto;
+    }
+
+    .bouquet-copy {
+        max-width: 620px;
+    }
+
+    .bouquet-visual {
+        min-height: 430px;
     }
 
     .hero {
@@ -1038,6 +1230,29 @@ body.is-birthday {
 
     .letter-paragraph {
         margin-bottom: 1em;
+    }
+
+    .bouquet-section {
+        gap: 4px;
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .bouquet-intro {
+        font-size: 15px;
+    }
+
+    .bouquet-button {
+        width: 100%;
+    }
+
+    .bouquet-visual {
+        min-height: 480px;
+    }
+
+    .bouquet-visual img {
+        bottom: 0;
+        width: min(330px, 100%);
     }
 
     .countdown-grid {

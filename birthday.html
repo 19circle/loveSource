@@ -4,9 +4,9 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>小蓝 2026 生日快乐</title>
-	<link href="css/birthday.css?v=20260716-letter2" rel="stylesheet">
+	<link href="css/birthday.css?v=20260716-bouquet3" rel="stylesheet">
 	<script src="js/vendor/hls.min.js?v=1.6.16" defer></script>
-	<script src="js/birthday.js?v=20260716-letter2" defer></script>
+	<script src="js/birthday.js?v=20260716-bouquet3" defer></script>
 </head>
 <body>
 <canvas id="birthdayCanvas" aria-hidden="true"></canvas>
@@ -169,6 +169,22 @@
 			<h2 id="letterTitle">写给小蓝的生日信</h2>
 		</div>
 		<div id="letterText" class="letter-text" aria-live="polite"></div>
+	</section>
+
+	<section id="birthdayBouquet" class="bouquet-section" aria-labelledby="bouquetTitle">
+		<div class="bouquet-copy">
+			<p class="eyebrow">A Bouquet For You</p>
+			<h2 id="bouquetTitle">送给小蓝的一束生日花</h2>
+			<p class="bouquet-intro">粉色玫瑰装着心动，白色洋桔梗装着温柔，满天星替我把每一句喜欢都留在你身边。</p>
+			<button id="receiveBouquetButton" class="bouquet-button" type="button" aria-pressed="false">
+				<span class="bouquet-button-mark" aria-hidden="true"></span>
+				<span>收下这束花</span>
+			</button>
+			<p id="bouquetMessage" class="bouquet-message" aria-live="polite">有一束花，正在安静地等小蓝亲手打开。</p>
+		</div>
+		<div id="bouquetVisual" class="bouquet-visual" aria-hidden="true">
+			<img src="media/birthday-bouquet.png" alt="" width="1024" height="1536" loading="lazy">
+		</div>
 	</section>
 
 	<section class="wish-section" aria-labelledby="wishGridTitle">

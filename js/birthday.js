@@ -326,6 +326,52 @@
         });
     }
 
+    function setupBouquet() {
+        var section = document.getElementById("birthdayBouquet");
+        var visual = document.getElementById("bouquetVisual");
+        var button = document.getElementById("receiveBouquetButton");
+        var message = document.getElementById("bouquetMessage");
+
+        if (!section || !visual || !button || !message) {
+            return;
+        }
+
+        button.addEventListener("click", function () {
+            section.classList.add("is-received");
+            button.setAttribute("aria-pressed", "true");
+            button.disabled = true;
+            button.querySelector("span:last-child").textContent = "花已经送到小蓝手里";
+            message.textContent = "愿小蓝往后的每一天，都像这束花一样明亮、温柔，也一直被爱包围。";
+            createSpark(button);
+            burstParticles(22);
+
+            if (!reducedMotion) {
+                releaseBouquetPetals(visual);
+            }
+        });
+    }
+
+    function releaseBouquetPetals(container) {
+        var colors = ["#f7a9bd", "#f8c3ce", "#fff0f2", "#e98da9"];
+
+        for (var i = 0; i < 15; i += 1) {
+            var petal = document.createElement("span");
+            petal.className = "falling-petal";
+            petal.style.setProperty("--petal-left", (14 + Math.random() * 72) + "%");
+            petal.style.setProperty("--petal-size", (9 + Math.random() * 8) + "px");
+            petal.style.setProperty("--petal-color", colors[i % colors.length]);
+            petal.style.setProperty("--petal-rotate", Math.round(Math.random() * 180) + "deg");
+            petal.style.setProperty("--petal-drift", (-55 + Math.random() * 110) + "px");
+            petal.style.setProperty("--petal-delay", (Math.random() * 0.75) + "s");
+            petal.style.setProperty("--petal-duration", (2.8 + Math.random() * 1.2) + "s");
+            container.appendChild(petal);
+
+            petal.addEventListener("animationend", function (event) {
+                event.currentTarget.remove();
+            }, { once: true });
+        }
+    }
+
     function typeLetter() {
         var container = document.getElementById("letterText");
         var paragraphs = letter.split("\n");
@@ -548,6 +594,7 @@
         setupVideo();
         setupCake();
         setupLetterButton();
+        setupBouquet();
         setupWishCards();
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
