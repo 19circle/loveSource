@@ -86,11 +86,31 @@
     function setupMusic() {
         var button = document.getElementById("musicToggle");
         var text = button.querySelector(".music-text");
+        var fallbackSource = birthdayAudio.getAttribute("data-audio-fallback");
+        var fallbackUsed = false;
+        var playRequested = false;
 
-        function setState(isPlaying) {
-            button.classList.toggle("is-playing", isPlaying);
-            text.textContent = isPlaying ? "生日歌播放中" : "开启音乐";
-            button.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+        birthdayAudio.dataset.audioSource = "cos";
+
+        function setMusicState(state, label) {
+            button.classList.toggle("is-playing", state === "playing");
+            button.classList.toggle("is-loading", state === "loading");
+            button.setAttribute("aria-pressed", state === "playing" ? "true" : "false");
+            text.textContent = label;
+        }
+
+        function switchToAudioFallback() {
+            if (fallbackUsed || !fallbackSource) {
+                return false;
+            }
+
+            fallbackUsed = true;
+            playRequested = false;
+            birthdayAudio.dataset.audioSource = "github-fallback";
+            birthdayAudio.src = fallbackSource;
+            birthdayAudio.load();
+            setMusicState("idle", "线路已切换，点击播放音乐");
+            return true;
         }
 
         button.addEventListener("click", function () {
@@ -99,11 +119,14 @@
                     memoryVideo.pause();
                 }
 
+                playRequested = true;
+                setMusicState("loading", "生日歌缓冲中...");
                 birthdayAudio.play().catch(function () {
-                    setState(false);
-                    text.textContent = "点击重试音乐";
+                    playRequested = false;
+                    setMusicState("idle", "点击重试音乐");
                 });
             } else {
+                playRequested = false;
                 birthdayAudio.pause();
             }
 
@@ -111,15 +134,30 @@
             burstParticles(20);
         });
 
-        birthdayAudio.addEventListener("play", function () {
-            setState(true);
+        birthdayAudio.addEventListener("playing", function () {
+            playRequested = false;
+            setMusicState("playing", "生日歌播放中");
         });
         birthdayAudio.addEventListener("pause", function () {
-            setState(false);
+            if (!playRequested) {
+                setMusicState("idle", "开启音乐");
+            }
+        });
+        birthdayAudio.addEventListener("waiting", function () {
+            if (!birthdayAudio.paused || playRequested) {
+                setMusicState("loading", "生日歌缓冲中...");
+            }
+        });
+        birthdayAudio.addEventListener("stalled", function () {
+            if (!birthdayAudio.paused || playRequested) {
+                setMusicState("loading", "网络波动，音乐缓冲中...");
+            }
         });
         birthdayAudio.addEventListener("error", function () {
-            setState(false);
-            text.textContent = "音乐加载失败";
+            playRequested = false;
+            if (!switchToAudioFallback()) {
+                setMusicState("idle", "音乐加载失败，请点击重试");
+            }
         });
     }
 

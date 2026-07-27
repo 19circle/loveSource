@@ -307,6 +307,10 @@ body.is-birthday {
     animation: pulseHeart 900ms ease-in-out infinite;
 }
 
+.primary-action.is-loading .heart-icon {
+    animation: musicLoading 850ms ease-in-out infinite alternate;
+}
+
 .primary-action:disabled {
     opacity: 0.72;
     cursor: wait;
@@ -1193,6 +1197,13 @@ body.is-birthday {
 @keyframes bouquetButtonSpin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes musicLoading {
+    to {
+        opacity: 0.42;
+        transform: scale(0.82);
     }
 }
 
