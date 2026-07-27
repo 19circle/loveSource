@@ -37,6 +37,15 @@
     var ctx = canvas.getContext("2d");
     var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var letterStarted = false;
+    var isMobileViewport = window.matchMedia("(max-width: 620px)").matches;
+    var isMediaActive = false;
+    var lastParticleFrame = 0;
+
+    function updateMediaActivity() {
+        var audioPlaying = !birthdayAudio.paused && !birthdayAudio.ended;
+        var videoPlaying = memoryVideo && !memoryVideo.paused && !memoryVideo.ended;
+        isMediaActive = Boolean(audioPlaying || videoPlaying);
+    }
 
     function pad(value) {
         return String(value).padStart(2, "0");
@@ -137,8 +146,10 @@
         birthdayAudio.addEventListener("playing", function () {
             playRequested = false;
             setMusicState("playing", "生日歌播放中");
+            updateMediaActivity();
         });
         birthdayAudio.addEventListener("pause", function () {
+            updateMediaActivity();
             if (!playRequested) {
                 setMusicState("idle", "开启音乐");
             }
@@ -223,11 +234,14 @@
                 birthdayAudio.pause();
             }
 
+            updateMediaActivity();
+
             if (memoryVideo.readyState < 3) {
                 setVideoState("高清纪念片正在缓冲，请稍候...", false);
             }
         });
         memoryVideo.addEventListener("playing", function () {
+            updateMediaActivity();
             setVideoState("", true);
             playButton.classList.add("is-hidden");
         });
@@ -245,6 +259,7 @@
             }
         });
         memoryVideo.addEventListener("ended", function () {
+            updateMediaActivity();
             playButton.classList.remove("is-hidden");
             playButton.setAttribute("aria-label", "重新播放纪念片");
             playButton.setAttribute("title", "重新播放纪念片");
@@ -409,6 +424,7 @@
                 isBouquetLoading = false;
             });
         });
+        memoryVideo.addEventListener("pause", updateMediaActivity);
     }
 
     function prepareBouquetImage(image) {
@@ -560,7 +576,8 @@
     }
 
     function resizeCanvas() {
-        var ratio = window.devicePixelRatio || 1;
+        isMobileViewport = window.matchMedia("(max-width: 620px)").matches;
+        var ratio = Math.min(window.devicePixelRatio || 1, isMobileViewport ? 1.5 : 2);
         canvas.width = Math.round(window.innerWidth * ratio);
         canvas.height = Math.round(window.innerHeight * ratio);
         canvas.style.width = window.innerWidth + "px";
@@ -605,7 +622,31 @@
         }
     }
 
-    function drawParticles() {
+    function getParticleLimit() {
+        if (!isMobileViewport) {
+            return 90;
+        }
+
+        return isMediaActive ? 24 : 36;
+    }
+
+    function drawParticles(timestamp) {
+        requestAnimationFrame(drawParticles);
+
+        if (document.hidden) {
+            return;
+        }
+
+        if (isMobileViewport && timestamp - lastParticleFrame < 1000 / 30) {
+            return;
+        }
+
+        lastParticleFrame = timestamp;
+        var particleLimit = getParticleLimit();
+        if (particles.length > particleLimit) {
+            particles.splice(0, particles.length - particleLimit);
+        }
+
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
         for (var i = particles.length - 1; i >= 0; i--) {
             var p = particles[i];
@@ -626,11 +667,9 @@
             }
         }
 
-        if (particles.length < 90 && Math.random() < 0.22) {
+        if (particles.length < particleLimit && Math.random() < 0.22) {
             addParticle();
         }
-
-        requestAnimationFrame(drawParticles);
     }
 
     function drawConfettiParticle(p) {
@@ -694,7 +733,7 @@
 
         if (!reducedMotion) {
             burstParticles(34);
-            drawParticles();
+            requestAnimationFrame(drawParticles);
         }
     }
 
