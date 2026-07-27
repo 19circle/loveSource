@@ -881,6 +881,18 @@ body.is-birthday {
     transform: none;
 }
 
+.bouquet-button.is-loading .bouquet-button-mark {
+    border: 2px solid rgba(111, 82, 96, 0.28);
+    border-top-color: #c83d70;
+    border-radius: 50%;
+    animation: bouquetButtonSpin 700ms linear infinite;
+}
+
+.bouquet-button.is-loading .bouquet-button-mark::before,
+.bouquet-button.is-loading .bouquet-button-mark::after {
+    display: none;
+}
+
 .bouquet-button-mark {
     position: relative;
     width: 17px;
@@ -929,6 +941,12 @@ body.is-birthday {
     display: none;
     place-items: center;
     isolation: isolate;
+}
+
+.bouquet-visual picture {
+    display: grid;
+    width: 100%;
+    place-items: center;
 }
 
 .bouquet-visual img {
@@ -1169,6 +1187,12 @@ body.is-birthday {
     100% {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes bouquetButtonSpin {
+    to {
+        transform: rotate(360deg);
     }
 }
 

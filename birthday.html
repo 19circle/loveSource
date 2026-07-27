@@ -4,9 +4,9 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>小蓝 2026 生日快乐</title>
-	<link href="css/birthday.css?v=20260716-bouquet4" rel="stylesheet">
+	<link href="css/birthday.css?v=20260727-media5" rel="stylesheet">
 	<script src="js/vendor/hls.min.js?v=1.6.16" defer></script>
-	<script src="js/birthday.js?v=20260716-bouquet4" defer></script>
+	<script src="js/birthday.js?v=20260727-media5" defer></script>
 </head>
 <body>
 <canvas id="birthdayCanvas" aria-hidden="true"></canvas>
@@ -183,7 +183,13 @@
 			<p id="bouquetMessage" class="bouquet-message" aria-live="polite">有一束花，正在安静地等小蓝亲手打开。</p>
 		</div>
 		<div id="bouquetVisual" class="bouquet-visual" aria-hidden="true">
-			<img src="media/birthday-bouquet.png" alt="" width="1024" height="1536" loading="lazy">
+			<picture>
+				<source type="image/webp"
+					srcset="media/birthday-bouquet-480.webp 480w, media/birthday-bouquet-760.webp 760w"
+					sizes="(max-width: 620px) 310px, 380px">
+				<img id="bouquetImage" src="media/birthday-bouquet.png" alt="" width="1024" height="1536"
+					decoding="async" fetchpriority="low">
+			</picture>
 		</div>
 	</section>
 

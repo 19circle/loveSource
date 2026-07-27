@@ -329,25 +329,80 @@
     function setupBouquet() {
         var section = document.getElementById("birthdayBouquet");
         var visual = document.getElementById("bouquetVisual");
+        var image = document.getElementById("bouquetImage");
         var button = document.getElementById("receiveBouquetButton");
         var message = document.getElementById("bouquetMessage");
+        var buttonText = button && button.querySelector("span:last-child");
+        var isBouquetLoading = false;
 
-        if (!section || !visual || !button || !message) {
+        if (!section || !visual || !image || !button || !buttonText || !message) {
             return;
         }
 
         button.addEventListener("click", function () {
-            section.classList.add("is-received");
-            button.setAttribute("aria-pressed", "true");
-            button.disabled = true;
-            button.querySelector("span:last-child").textContent = "花已经送到小蓝手里";
-            message.textContent = "愿小蓝往后的每一天，都像这束花一样明亮、温柔，也一直被爱包围。";
-            createSpark(button);
-            burstParticles(22);
-
-            if (!reducedMotion) {
-                releaseBouquetPetals(visual);
+            if (isBouquetLoading) {
+                return;
             }
+
+            isBouquetLoading = true;
+            button.disabled = true;
+            button.classList.add("is-loading");
+            buttonText.textContent = "花束准备中...";
+            message.textContent = "正在把花束完整地送到小蓝手里...";
+
+            prepareBouquetImage(image).then(function () {
+                section.classList.add("is-received");
+                button.classList.remove("is-loading");
+                button.setAttribute("aria-pressed", "true");
+                buttonText.textContent = "花已经送到小蓝手里";
+                message.textContent = "愿小蓝往后的每一天，都像这束花一样明亮、温柔，也一直被爱包围。";
+                createSpark(button);
+                burstParticles(22);
+
+                if (!reducedMotion) {
+                    releaseBouquetPetals(visual);
+                }
+            }).catch(function () {
+                button.disabled = false;
+                button.classList.remove("is-loading");
+                buttonText.textContent = "重新加载这束花";
+                message.textContent = "花束刚刚走得有点慢，请再轻轻点一次。";
+            }).finally(function () {
+                isBouquetLoading = false;
+            });
+        });
+    }
+
+    function prepareBouquetImage(image) {
+        return new Promise(function (resolve, reject) {
+            function decodeImage() {
+                if (typeof image.decode !== "function") {
+                    resolve();
+                    return;
+                }
+
+                image.decode().then(resolve).catch(function () {
+                    if (image.complete && image.naturalWidth > 0) {
+                        resolve();
+                    } else {
+                        reject(new Error("Bouquet decode failed"));
+                    }
+                });
+            }
+
+            if (image.complete) {
+                if (image.naturalWidth > 0) {
+                    decodeImage();
+                } else {
+                    reject(new Error("Bouquet load failed"));
+                }
+                return;
+            }
+
+            image.addEventListener("load", decodeImage, { once: true });
+            image.addEventListener("error", function () {
+                reject(new Error("Bouquet load failed"));
+            }, { once: true });
         });
     }
 
