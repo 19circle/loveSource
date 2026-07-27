@@ -97,6 +97,7 @@
         var text = button.querySelector(".music-text");
         var fallbackSource = birthdayAudio.getAttribute("data-audio-fallback");
         var fallbackUsed = false;
+        var fallbackNotice = false;
         var playRequested = false;
 
         birthdayAudio.dataset.audioSource = "cos";
@@ -114,6 +115,7 @@
             }
 
             fallbackUsed = true;
+            fallbackNotice = true;
             playRequested = false;
             birthdayAudio.dataset.audioSource = "github-fallback";
             birthdayAudio.src = fallbackSource;
@@ -123,6 +125,7 @@
         }
 
         button.addEventListener("click", function () {
+            fallbackNotice = false;
             if (birthdayAudio.paused) {
                 if (memoryVideo && !memoryVideo.paused) {
                     memoryVideo.pause();
@@ -150,7 +153,7 @@
         });
         birthdayAudio.addEventListener("pause", function () {
             updateMediaActivity();
-            if (!playRequested) {
+            if (!playRequested && !fallbackNotice) {
                 setMusicState("idle", "开启音乐");
             }
         });
@@ -264,6 +267,7 @@
             playButton.setAttribute("aria-label", "重新播放纪念片");
             playButton.setAttribute("title", "重新播放纪念片");
         });
+        memoryVideo.addEventListener("pause", updateMediaActivity);
 
         if (prefersNativeHls) {
             loadNativeHls(hlsSource, false);
@@ -424,7 +428,6 @@
                 isBouquetLoading = false;
             });
         });
-        memoryVideo.addEventListener("pause", updateMediaActivity);
     }
 
     function prepareBouquetImage(image) {
